@@ -1,0 +1,186 @@
+import { StackScreenProps } from "@react-navigation/stack";
+import React, { useState } from "react";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
+import { cardStyle, colors, paddings, titleStyle } from "../../theme/appTheme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { DateTime } from "luxon";
+import { createTurn, emptyTurns } from "../../redux/slices/turnsSlice";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { selectAuth } from "../../redux/slices/authSlice";
+
+import { ScrollView } from "react-native-gesture-handler";
+import IonIcon from "react-native-vector-icons/Ionicons";
+import { FieldComponent } from "../components/FieldComponent";
+import { SearchStackParamList } from "../navigators/SearchNavigatorPlayers";
+
+interface Props
+  extends StackScreenProps<SearchStackParamList, "ComplexScreen"> {}
+
+export const ComplexScreen = ({ route }: Props) => {
+  const { availableTurns } = route.params;
+  const [selectedTurn, setSelectedTurn] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const { _id: playerId } = useAppSelector(selectAuth);
+  const dispatch = useAppDispatch();
+  const { top } = useSafeAreaInsets();
+  const { complex } = route.params;
+
+  const { FootballFields } = complex;
+
+  const submitTurn = () => {
+    dispatch(
+      createTurn({
+        playerId,
+        complexId: complex._id,
+        complexOwnerId: complex.ownerId,
+        startDate: DateTime.fromFormat(selectedTurn, "HH:mm"),
+        endDate: DateTime.fromFormat(selectedTurn, "HH:mm").plus({
+          hours: 1,
+        }),
+        fieldId: complex.FootballFields[0]._id,
+      })
+    );
+    setModalVisible(false);
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        style={{
+          flex: 1,
+          paddingTop: top,
+          paddingHorizontal: paddings.globalPadding,
+        }}
+        contentContainerStyle={{
+          flex: 1,
+        }}
+      >
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            console.log("closing");
+
+            setModalVisible(false);
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#00000044",
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: colors.cardBg,
+                padding: 16,
+                borderRadius: paddings.globalRadius,
+                gap: 16,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                }}
+              >
+                <Text style={{ ...titleStyle }}>Reservar turno</Text>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <IonIcon name="close-outline" size={24} color={"red"} />
+                </TouchableOpacity>
+              </View>
+              <Text style={{}}>
+                ¿Quieres reservar el turno de las {selectedTurn}?
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                }}
+              >
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Text>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={submitTurn}>
+                  <Text>Confirmar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+        <Text style={titleStyle}>{complex.name}</Text>
+        <View style={{ gap: 16, flex: 1 }}>
+          {FootballFields
+            ? FootballFields.map((footballField) => {
+                const fieldTurns = availableTurns.filter((turn) => {
+                  return turn.fieldId === footballField._id;
+                });
+                return (
+                  <FieldComponent
+                    availableTurns={fieldTurns}
+                    footballField={footballField}
+                    onTurnPress={(turnTime) => {
+                      setSelectedTurn(turnTime.toFormat("HH:mm"));
+                      setModalVisible(true);
+                    }}
+                  />
+                );
+              })
+            : null}
+
+          <View
+            style={{
+              flexDirection: "row",
+              columnGap: 4,
+              flexWrap: "wrap",
+              rowGap: 8,
+            }}
+          >
+            {availableTurns.map(({ turnTime, available }, idx) => {
+              if (available)
+                return (
+                  <TouchableOpacity
+                    style={{
+                      ...cardStyle,
+                      flex: 0,
+                      paddingVertical: 4,
+                      paddingHorizontal: 8,
+                    }}
+                    key={`available-turn-${idx}`}
+                    onPress={() => {
+                      setSelectedTurn(turnTime.toFormat("HH:mm"));
+                      setModalVisible(true);
+                    }}
+                  >
+                    <Text>{turnTime.toFormat("HH:mm")}</Text>
+                  </TouchableOpacity>
+                );
+              else return null;
+            })}
+          </View>
+        </View>
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            backgroundColor: "#FF5858",
+            bottom: 120,
+            right: 10,
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 4,
+          }}
+          onPress={() => dispatch(emptyTurns())}
+        >
+          <Text style={{ color: "white", fontWeight: "bold" }}>
+            Empty Turns
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+  );
+};
