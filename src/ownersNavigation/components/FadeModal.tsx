@@ -1,18 +1,23 @@
 import React, { useEffect } from "react";
-import { Modal, Text, View } from "react-native";
+import { Modal, View } from "react-native";
 import { colors } from "../../theme/appTheme";
 
 interface Props {
   modalState: {
     visible: boolean;
     status: string;
+    complexId?: string;
+    autoDismiss: boolean;
   };
   setModalVisible: React.Dispatch<
     React.SetStateAction<{
       visible: boolean;
       status: string;
+      complexId?: string;
+      autoDismiss: boolean;
     }>
   >;
+
   modalContent: () => React.JSX.Element;
 }
 
@@ -23,6 +28,7 @@ export const FadeModal = ({
 }: Props) => {
   useEffect(() => {
     modalState.visible === true &&
+      modalState.autoDismiss &&
       setTimeout(() => {
         setModalVisible({ ...modalState, visible: false });
       }, 3000);

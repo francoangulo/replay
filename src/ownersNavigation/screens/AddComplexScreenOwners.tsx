@@ -39,6 +39,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
     visible: false,
     status: "",
     complexId: "",
+    autoDismiss: true,
   });
 
   useEffect(() => {
@@ -100,7 +101,12 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
 
   const goNextStep = () => {
     if (false) {
-      setModalState({ visible: true, status: "success", complexId: "123" });
+      setModalState({
+        visible: true,
+        status: "success",
+        complexId: "123",
+        autoDismiss: true,
+      });
     } else {
       const checkedErrors = checkErrors();
       if (
@@ -121,7 +127,12 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
             //     complexPicture, // ! TODO
           },
           callback: (complexId) =>
-            setModalState({ visible: true, status: "success", complexId }),
+            setModalState({
+              visible: true,
+              status: "success",
+              complexId,
+              autoDismiss: true,
+            }),
         })
       );
     }
@@ -145,7 +156,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
         >
           <View style={{ flex: 1, justifyContent: "space-between" }}>
             <View style={{ gap: 32 }}>
-              <View style={{ ...cardStyle, gap: 16 }}>
+              <View style={{ ...(cardStyle as Object), gap: 16 }}>
                 <FormInput
                   label="Nombre del complejo"
                   error={errors.complexName}
@@ -203,7 +214,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
                   style={{
                     width: windowWidth - 32,
                     height: (windowWidth - 32) / 1.78,
-                    ...cardStyle,
+                    ...(cardStyle as Object),
                     padding: 0,
                   }}
                   onPress={selectPicture}

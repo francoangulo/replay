@@ -61,7 +61,7 @@ export const getOwnerTurns =
     try {
       const params = { complexOwnerId: ownerId };
       const resp = await axios.get<TurnsResponse>(
-        "http://192.168.100.178:3000/turns",
+        "http://localhost:3000/turns",
         { params }
       );
       console.log("resp", JSON.stringify(resp, null, 4));
@@ -73,9 +73,7 @@ export const getOwnerTurns =
 
 export const getAllTurns = () => async (dispatch: AppDispatch) => {
   try {
-    const resp = await axios.get<TurnsResponse>(
-      "http://192.168.100.178:3000/turns"
-    );
+    const resp = await axios.get<TurnsResponse>("http://localhost:3000/turns");
     console.log("resp", JSON.stringify(resp, null, 4));
     dispatch(setAllTurns(resp.data.turns));
   } catch (error) {
@@ -102,14 +100,11 @@ export const createTurn =
     startDate,
   }: TurnProps) =>
   async (dispatch: AppDispatch) => {
-    console.log("Creating");
-
     try {
       const resp = await axios.post<CreateTurnResponse>(
-        "http://192.168.100.178:3000/turns",
+        "http://localhost:3000/turns",
         { playerId, complexId, complexOwnerId, endDate, fieldId, startDate }
       );
-      console.log("resp", JSON.stringify(resp.data, null, 4));
       dispatch(setAllTurns([resp.data.newTurn]));
     } catch (error) {
       console.log({ error });
@@ -121,7 +116,7 @@ export const emptyTurns = () => async (dispatch: AppDispatch) => {
 
   try {
     const resp = await axios.delete<CreateTurnResponse>(
-      "http://192.168.100.178:3000/turns/all"
+      "http://localhost:3000/turns/all"
     );
     console.log("resp", JSON.stringify(resp.data, null, 4));
     dispatch(resetAllTurns());

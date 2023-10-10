@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -20,14 +20,27 @@ interface Props extends StackScreenProps<any, any> {
 
 export const ComplexCard = ({ navigation, complex }: Props) => {
   const { allTurns } = useAppSelector(selectTurns);
-  const { availableTurns, loadingAvailableTurns } = useAvailableTurns({
-    footballFields: complex.FootballFields,
-    turns: allTurns,
-  });
+  const { availableTurns, loadingAvailableTurns, getAvailableTurns } =
+    useAvailableTurns({
+      complex,
+      turns: allTurns,
+    });
   const { name, address } = complex;
+
+  useEffect(() => {
+    getAvailableTurns();
+  }, [allTurns]);
+
   if (loadingAvailableTurns) {
     return <ActivityIndicator size={50} color={colors.primary} />;
   }
+  const turnsAmount = availableTurns.reduce((acc, { available }) => {
+    if (available) {
+      acc++;
+    }
+    return acc;
+  }, 0);
+
   return (
     <TouchableOpacity
       style={cardStyle}
@@ -36,7 +49,11 @@ export const ComplexCard = ({ navigation, complex }: Props) => {
           "available turns my bro",
           JSON.stringify(availableTurns, null, 4)
         );
-        navigation.navigate("ComplexScreen", { complex, availableTurns });
+        navigation.navigate("ComplexScreen", {
+          complex,
+          availableTurns,
+          getAvailableTurns,
+        });
       }}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -75,7 +92,7 @@ export const ComplexCard = ({ navigation, complex }: Props) => {
                   color: "gray",
                 }}
               >
-                {availableTurns.length} turnos disponibles
+                {turnsAmount} turnos disponibles
               </Text>
             </View>
           </View>

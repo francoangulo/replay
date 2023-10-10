@@ -39,9 +39,10 @@ export const loginOwner = (email: string) => async (dispatch: AppDispatch) => {
   try {
     const params = { email };
     const resp = await axios.get<OwnerResponse>(
-      "http://192.168.100.178:3000/owners",
+      "http://localhost:3000/owners",
       { params }
     );
+    console.log("franco respuesta", JSON.stringify(resp.data, null, 4));
     dispatch(login({ ...resp.data.owner, userType: "owner" }));
   } catch (error) {
     console.log({ error });
@@ -52,12 +53,13 @@ export const loginPlayer = (email: string) => async (dispatch: AppDispatch) => {
   try {
     const params = { email };
     const resp = await axios.get<PlayerResponse>(
-      "http://192.168.100.178:3000/players",
+      "http://localhost:3000/players",
       { params }
     );
+    console.log("franco respuesta", JSON.stringify(resp.data, null, 4));
     dispatch(login({ ...resp.data.player, userType: "player" }));
   } catch (error) {
-    console.log({ error });
+    console.log({ errorFranco: error });
   }
 };
 

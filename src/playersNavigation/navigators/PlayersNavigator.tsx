@@ -44,6 +44,7 @@ export const PlayersTabNavigator = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  console.log("franco loading", JSON.stringify(loading, null, 4));
   if (loading) return <ActivityIndicator size={20} />;
 
   return (

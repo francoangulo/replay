@@ -1,5 +1,5 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { cardStyle, colors, paddings, titleStyle } from "../../theme/appTheme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -12,18 +12,56 @@ import { ScrollView } from "react-native-gesture-handler";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import { FieldComponent } from "../components/FieldComponent";
 import { SearchStackParamList } from "../navigators/SearchNavigatorPlayers";
+import { CalendarProvider, ExpandableCalendar } from "react-native-calendars";
 
 interface Props
   extends StackScreenProps<SearchStackParamList, "ComplexScreen"> {}
 
-export const ComplexScreen = ({ route }: Props) => {
-  const { availableTurns } = route.params;
+export const ComplexScreen = ({ route, navigation }: Props) => {
+  const { availableTurns, getAvailableTurns } = route.params;
   const [selectedTurn, setSelectedTurn] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDateString, setSelectedDateString] = useState(
+    DateTime.local().toFormat("yyyy-MM-dd")
+  );
   const { _id: playerId } = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
   const { top } = useSafeAreaInsets();
   const { complex } = route.params;
+
+  useEffect(() => {
+    navigation.setOptions({
+      header: () => (
+        <View
+          style={{
+            padding: 24,
+            paddingTop: top,
+            backgroundColor: colors.cardBg,
+          }}
+        >
+          <Text style={{ fontSize: 24, fontWeight: "bold" }}>
+            {complex.name}
+          </Text>
+        </View>
+      ),
+    });
+  }, []);
+
+  useEffect(() => {
+    navigation.setParams({
+      availableTurns: getAvailableTurns(
+        DateTime.fromFormat(selectedDateString, "yyyy-MM-dd")
+      ),
+    });
+    console.log(
+      "franco fecha:",
+      JSON.stringify(
+        DateTime.fromFormat(selectedDateString, "yyyy-MM-dd"),
+        null,
+        4
+      )
+    );
+  }, [selectedDateString]);
 
   const { FootballFields } = complex;
 
@@ -41,6 +79,7 @@ export const ComplexScreen = ({ route }: Props) => {
       })
     );
     setModalVisible(false);
+    navigation.pop();
   };
 
   return (
@@ -48,7 +87,6 @@ export const ComplexScreen = ({ route }: Props) => {
       <ScrollView
         style={{
           flex: 1,
-          paddingTop: top,
           paddingHorizontal: paddings.globalPadding,
         }}
         contentContainerStyle={{
@@ -113,6 +151,58 @@ export const ComplexScreen = ({ route }: Props) => {
             </View>
           </View>
         </Modal>
+        <CalendarProvider
+          date={selectedDateString}
+          //     style={{ backgroundColor: "red" }}
+          theme={{
+            backgroundColor: "#040404",
+            selectedDayBackgroundColor: "#000",
+            arrowWidth: 90,
+            monthTextColor: "green",
+            todayButtonFontSize: 40,
+            agendaKnobColor: "red",
+          }}
+          onDateChanged={(date) => setSelectedDateString(date)}
+        >
+          <ExpandableCalendar
+            disableWeekScroll
+            theme={{
+              backgroundColor: "red",
+              monthTextColor: "green",
+              todayBackgroundColor: "yellow",
+              todayButtonTextColor: "green",
+              selectedDayBackgroundColor: "green",
+              selectedDayTextColor: "white",
+              textSectionTitleColor: "red",
+              textDayFontWeight: "bold",
+              dayTextColor: "black",
+              agendaDayTextColor: "green",
+              stylesheet: {
+                expandable: {
+                  main: {
+                    //   backgroundColor: "red",
+                    knob: {
+                      width: 40,
+                      height: 4,
+                      borderRadius: 3,
+                      backgroundColor: "green",
+                    },
+                    containerShadow: {
+                      elevation: 0,
+                      shadowOpacity: 0,
+                      height: 0,
+                      shadowOffset: {
+                        width: 0,
+                        height: 2,
+                      },
+                    },
+                  },
+                },
+              },
+            }}
+            style={{ padding: 16 }}
+          />
+        </CalendarProvider>
         <Text style={titleStyle}>{complex.name}</Text>
         <View style={{ gap: 16, flex: 1 }}>
           {FootballFields
@@ -128,6 +218,7 @@ export const ComplexScreen = ({ route }: Props) => {
                       setSelectedTurn(turnTime.toFormat("HH:mm"));
                       setModalVisible(true);
                     }}
+                    complex={complex}
                   />
                 );
               })

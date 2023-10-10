@@ -4,24 +4,28 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { cardStyle, cardTitleStyle, colors } from "../../theme/appTheme";
 import { FootballField } from "../../interfaces/FootballFields";
 import { AvailableTurn } from "../../hooks/useAvailableTurns";
+import { Complex } from "../../interfaces/complexes";
+import QRCode from "react-native-qrcode-svg";
 
 interface Props {
   footballField: FootballField;
   availableTurns: AvailableTurn[];
   onTurnPress: (turnTime: DateTime) => void;
+  complex: Complex;
 }
 
 export const FieldComponent = ({
   footballField,
   availableTurns,
   onTurnPress,
+  complex,
 }: Props) => {
   console.log("available turns", JSON.stringify(availableTurns, null, 4));
   return (
     <View style={cardStyle}>
       <View style={{ flexDirection: "row" }}>
         <Text style={cardTitleStyle}>Cancha {footballField.fieldNumber}</Text>
-        {footballField.FieldSchedules.map(({ openingTime, closingTime }) => {
+        {complex.ComplexSchedules.map(({ openingTime, closingTime }) => {
           return (
             <Text
               style={{
@@ -71,7 +75,8 @@ export const FieldComponent = ({
                     </Text>
                   </TouchableOpacity>
                 );
-              else return null;
+              else
+                return <QRCode value={[{ data: "francoqr", mode: "byte" }]} />;
             })
           : null}
       </View>

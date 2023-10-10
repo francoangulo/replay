@@ -5,11 +5,14 @@ import { Complex } from "../../interfaces/complexes";
 import { SearchScreenPlayers } from "../screens/SearchScreenPlayers";
 import { ComplexScreen } from "../screens/ComplexScreen";
 import { AvailableTurn } from "../../hooks/useAvailableTurns";
-import { Text, TextInput, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { DateTime } from "luxon";
 
 export type SearchStackParamList = {
-  ComplexScreen: { complex: Complex; availableTurns: AvailableTurn[] };
+  ComplexScreen: {
+    complex: Complex;
+    availableTurns: AvailableTurn[];
+    getAvailableTurns: (selectedDate: DateTime) => AvailableTurn[];
+  };
 };
 
 const Stack = createStackNavigator<SearchStackParamList>();
@@ -21,9 +24,7 @@ const screens = [
   {
     name: "Search",
     component: SearchScreenPlayers,
-    options: {
-      ...generalOptions,
-    },
+    options: { ...generalOptions },
   },
   {
     name: "ComplexScreen",

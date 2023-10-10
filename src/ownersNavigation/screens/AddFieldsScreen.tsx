@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Text,
   TouchableOpacity,
@@ -20,6 +20,7 @@ import {
   postFootballFields,
 } from "../../redux/slices/complexesSlice";
 import ADIcon from "react-native-vector-icons/AntDesign";
+import { FadeModal } from "../components/FadeModal";
 
 type Props = StackScreenProps<ProfileStackParamList, "AddFieldsScreen">;
 
@@ -45,36 +46,61 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
   const dispatch = useAppDispatch();
 
   const [fieldsAmount, setFieldsAmount] = useState(1);
+  const [modalState, setModalState] = useState({
+    visible: false,
+    status: "",
+    autoDismiss: true,
+  });
+
+  useEffect(() => {
+    if (modalState.visible === false && modalState.status === "success") {
+      console.log("FRANCO MUY BIEN");
+
+      navigation.pop();
+    }
+  }, [modalState]);
+
   console.log("franco route", JSON.stringify(route, null, 4));
   const complexId = route?.params?.complexId;
 
   const submitComplex = () => {
-    const errors = schedulesHaveErrors();
-    console.log("franco errores", JSON.stringify(errors, null, 4));
-    if (errors) return;
-    dispatch(postFootballFields({ body: { fieldsAmount, complexId } }));
-    dispatch(
-      postComplexSchedules({
-        body: {
-          schedules: footballSchedules.map(
-            ({
-              weekDays,
-              sport,
-              openingHour,
-              openingMinute,
-              closingHour,
-              closingMinute,
-            }) => ({
-              weekDays,
-              sport,
-              openingTime: `${openingHour}:${openingMinute}`,
-              closingTime: `${closingHour}:${closingMinute}`,
-            })
-          ),
-          complexId,
-        },
-      })
-    );
+    if (false) {
+      setModalState({ visible: true, status: "success", autoDismiss: true });
+    } else {
+      const errors = schedulesHaveErrors();
+      console.log("franco errores", JSON.stringify(errors, null, 4));
+      if (errors) return;
+      setModalState({ visible: true, status: "loading", autoDismiss: false });
+      dispatch(postFootballFields({ body: { fieldsAmount, complexId } }));
+      dispatch(
+        postComplexSchedules({
+          body: {
+            schedules: footballSchedules.map(
+              ({
+                weekDays,
+                sport,
+                openingHour,
+                openingMinute,
+                closingHour,
+                closingMinute,
+              }) => ({
+                weekDays,
+                sport,
+                openingTime: `${openingHour}:${openingMinute}`,
+                closingTime: `${closingHour}:${closingMinute}`,
+              })
+            ),
+            complexId,
+          },
+          callback: () =>
+            setModalState({
+              visible: true,
+              status: "success",
+              autoDismiss: true,
+            }),
+        })
+      );
+    }
   };
 
   return (
@@ -271,6 +297,55 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
         setCurrentPickingDate={setCurrentPickingDate}
         setCurrentPickingError={setCurrentPickingError}
         setModalVisible={setModalVisible}
+      />
+      <FadeModal
+        modalState={modalState}
+        setModalVisible={setModalState}
+        modalContent={() => {
+          return (
+            <View>
+              {modalState.status === "error" ? (
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    rowGap: 8,
+                  }}
+                >
+                  <Text style={{ fontSize: 40 }}>❗️</Text>
+                  <Text style={{ fontSize: 20 }}>Se produjo un error</Text>
+                  <Text style={{ fontSize: 16, textAlign: "center" }}>
+                    Si el problema persiste, contacta un administrador
+                  </Text>
+                </View>
+              ) : modalState.status === "loading" ? (
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    rowGap: 8,
+                  }}
+                >
+                  <Text style={{ fontSize: 40 }}>⏳</Text>
+                  <Text style={{ fontSize: 20 }}>Añadiendo canchas...</Text>
+                </View>
+              ) : (
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    rowGap: 8,
+                  }}
+                >
+                  <Text style={{ fontSize: 40 }}>✅</Text>
+                  <Text style={{ fontSize: 20 }}>
+                    Canchas agregadas con éxito!
+                  </Text>
+                </View>
+              )}
+            </View>
+          );
+        }}
       />
     </View>
   );

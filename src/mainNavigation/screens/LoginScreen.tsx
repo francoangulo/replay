@@ -24,10 +24,10 @@ interface Props extends StackScreenProps<any, any> {}
 export const LoginScreen = ({ navigation }: Props) => {
   const getUsers = async () => {
     const response1 = await axios.get<AllOwnersResponse>(
-      "http://192.168.100.178:3000/owners"
+      "http://localhost:3000/owners"
     );
     const response2 = await axios.get<PlayersResponse>(
-      "http://192.168.100.178:3000/players"
+      "http://localhost:3000/players"
     );
     const users = {
       owners: response1.data.owners,
@@ -43,8 +43,9 @@ export const LoginScreen = ({ navigation }: Props) => {
   const [ownerMode, setOwnerMode] = useState(false);
   const authState = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
-  const submitLogin = () => {
+  const submitLogin = async () => {
     console.log("DISPATCHING");
+    console.log("owner mode: ", ownerMode);
 
     if (ownerMode) {
       dispatch(loginOwner("francoangulo2001@gmail.com"));
