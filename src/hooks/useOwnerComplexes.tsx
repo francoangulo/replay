@@ -7,7 +7,7 @@ export const useOwnerComplexes = (ownerId: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const getComplexes = async () => {
     const response = await axios.get<ComplexesResponse>(
-      "http://localhost:3000/complexes",
+      "http://192.168.100.178:3000/complexes",
       { params: { ownerId } }
     );
     setOwnerComplexes(response.data.complexes);

@@ -6,7 +6,7 @@ export const useComplexes = () => {
   const [complexes, setComplexes] = useState<Complex[]>();
   const getComplexes = async () => {
     const response = await axios.get<ComplexesResponse>(
-      "http://localhost:3000/complexes"
+      "http://192.168.100.178:3000/complexes"
     );
     setComplexes(response.data.complexes);
   };

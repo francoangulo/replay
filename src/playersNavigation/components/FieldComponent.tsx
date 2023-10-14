@@ -75,8 +75,7 @@ export const FieldComponent = ({
                     </Text>
                   </TouchableOpacity>
                 );
-              else
-                return <QRCode value={[{ data: "francoqr", mode: "byte" }]} />;
+              else return null;
             })
           : null}
       </View>

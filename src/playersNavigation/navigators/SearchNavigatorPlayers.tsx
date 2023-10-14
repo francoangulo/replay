@@ -6,13 +6,17 @@ import { SearchScreenPlayers } from "../screens/SearchScreenPlayers";
 import { ComplexScreen } from "../screens/ComplexScreen";
 import { AvailableTurn } from "../../hooks/useAvailableTurns";
 import { DateTime } from "luxon";
+import { Turn } from "../../interfaces/Turns";
+import { BookedTurnScreen } from "../screens/BookedTurnScreen";
 
 export type SearchStackParamList = {
+  Search: undefined;
   ComplexScreen: {
     complex: Complex;
     availableTurns: AvailableTurn[];
     getAvailableTurns: (selectedDate: DateTime) => AvailableTurn[];
   };
+  BookedTurnScreen: { turn: Turn };
 };
 
 const Stack = createStackNavigator<SearchStackParamList>();
@@ -29,6 +33,11 @@ const screens = [
   {
     name: "ComplexScreen",
     component: ComplexScreen,
+    options: { ...generalOptions },
+  },
+  {
+    name: "BookedTurnScreen",
+    component: BookedTurnScreen,
     options: { ...generalOptions },
   },
 ];

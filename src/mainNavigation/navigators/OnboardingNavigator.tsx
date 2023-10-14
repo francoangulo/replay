@@ -4,11 +4,16 @@ import { colors } from "../../theme/appTheme";
 import { OwnersTabNavigator } from "../../ownersNavigation/navigators/OwnersNavigator";
 import { PlayersTabNavigator } from "../../playersNavigation/navigators/PlayersNavigator";
 import { LoginScreen } from "../screens/LoginScreen";
+import SignupScreen from "../screens/SignupScreen";
 
 const screens = [
   {
     name: "LoginScreen",
     component: LoginScreen,
+  },
+  {
+    name: "SignupScreen",
+    component: SignupScreen,
   },
   { name: "OwnersNavigator", component: OwnersTabNavigator },
   { name: "PlayersNavigator", component: PlayersTabNavigator },

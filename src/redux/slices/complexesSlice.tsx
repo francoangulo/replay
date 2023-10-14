@@ -87,7 +87,7 @@ const {
 export const getComplexes = () => async (dispatch: AppDispatch) => {
   try {
     const resp = await axios.get<ComplexesResponse>(
-      "http://localhost:3000/complexes"
+      "http://192.168.100.178:3000/complexes"
     );
     dispatch(setComplexes(resp.data.complexes));
   } catch (error) {
@@ -106,7 +106,7 @@ export const postComplex =
     console.log("franco body", JSON.stringify(body, null, 4));
     try {
       const resp = await axios.post<PostComplexResponse>(
-        "http://localhost:3000/complexes",
+        "http://192.168.100.178:3000/complexes",
         body
       );
       dispatch(setComplexes([resp.data.newComplex]));
@@ -122,7 +122,7 @@ export const deleteComplex =
   async (dispatch: AppDispatch) => {
     try {
       const resp = await axios.delete<DeleteComplexResponse>(
-        "http://localhost:3000/complexes",
+        "http://192.168.100.178:3000/complexes",
         { data: { complexId } }
       );
       console.log("response", JSON.stringify(resp.data, null, 4));
@@ -149,7 +149,7 @@ export const postFootballFields =
     console.log("franco body", JSON.stringify(body, null, 4));
     try {
       const resp = await axios.post<PostMultipleFieldsResponse>(
-        "http://localhost:3000/football-fields/by-number",
+        "http://192.168.100.178:3000/football-fields/by-number",
         body
       );
       dispatch(
@@ -192,7 +192,7 @@ export const postComplexSchedules =
 
     try {
       const resp = await axios.post<PostMultipleSchedulesResponse>(
-        "http://localhost:3000/complexes-schedules/multiple",
+        "http://192.168.100.178:3000/complexes-schedules/multiple",
         body
       );
       dispatch(

@@ -18,16 +18,20 @@ import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import axios from "axios";
 import { AllOwnersResponse } from "../../interfaces/Owners";
 import { PlayersResponse } from "../../interfaces/Players";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props extends StackScreenProps<any, any> {}
 
-export const LoginScreen = ({ navigation }: Props) => {
+export const LoginScreen = ({ navigation, route }: Props) => {
+  const emailParam = route.params?.email ?? "";
+  const turnIdParam = route.params?.turnId ?? "";
+  console.log("franco email param:", JSON.stringify(emailParam, null, 4));
   const getUsers = async () => {
     const response1 = await axios.get<AllOwnersResponse>(
-      "http://localhost:3000/owners"
+      "http://192.168.100.178:3000/owners"
     );
     const response2 = await axios.get<PlayersResponse>(
-      "http://localhost:3000/players"
+      "http://192.168.100.178:3000/players"
     );
     const users = {
       owners: response1.data.owners,
@@ -36,10 +40,16 @@ export const LoginScreen = ({ navigation }: Props) => {
     console.log("users", JSON.stringify(users, null, 4));
   };
   useEffect(() => {
+    if (emailParam) {
+      dispatch(loginOwner(emailParam));
+
+      navigation.replace("OwnersNavigator", { turnIdParam });
+    }
     getUsers();
   }, []);
 
   const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [ownerMode, setOwnerMode] = useState(false);
   const authState = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
@@ -51,13 +61,25 @@ export const LoginScreen = ({ navigation }: Props) => {
       dispatch(loginOwner("francoangulo2001@gmail.com"));
       navigation.replace("OwnersNavigator");
     } else {
-      dispatch(loginPlayer("francoplayer@gmail.com"));
-      navigation.replace("PlayersNavigator");
+      dispatch(
+        loginPlayer(email, password, () =>
+          navigation.replace("PlayersNavigator")
+        )
+      );
     }
   };
   useEffect(() => {
     console.log("authState", JSON.stringify(authState, null, 4));
   }, [authState]);
+
+  const getToken = async () => {
+    const token = await AsyncStorage.getItem("TOKEN");
+    console.log("franco token", JSON.stringify(token, null, 4));
+  };
+
+  useEffect(() => {
+    getToken();
+  }, []);
 
   return (
     <SafeAreaView
@@ -82,9 +104,24 @@ export const LoginScreen = ({ navigation }: Props) => {
             backgroundColor: colors.appBg,
             borderBottomColor: "black",
           }}
+          defaultValue={email}
           keyboardType="email-address"
           onChangeText={setEmail}
           placeholder="Ingresa tu email..."
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={{
+            width: "100%",
+            height: 40,
+            padding: 8,
+            backgroundColor: colors.appBg,
+            borderBottomColor: "black",
+          }}
+          defaultValue={password}
+          keyboardType="email-address"
+          onChangeText={setPassword}
+          placeholder="Ingresa tu contraseña..."
           autoCapitalize="none"
         />
         <TouchableOpacity
@@ -110,6 +147,16 @@ export const LoginScreen = ({ navigation }: Props) => {
       >
         <Text style={{ color: ownerMode ? colors.appBg : colors.primary }}>
           {ownerMode ? "Player?" : "Owner?"}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("SignupScreen");
+        }}
+      >
+        <Text style={{ color: ownerMode ? colors.appBg : colors.primary }}>
+          Signup
         </Text>
       </TouchableOpacity>
     </SafeAreaView>

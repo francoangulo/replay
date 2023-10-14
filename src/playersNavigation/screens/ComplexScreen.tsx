@@ -13,21 +13,23 @@ import IonIcon from "react-native-vector-icons/Ionicons";
 import { FieldComponent } from "../components/FieldComponent";
 import { SearchStackParamList } from "../navigators/SearchNavigatorPlayers";
 import { CalendarProvider, ExpandableCalendar } from "react-native-calendars";
+import { Turn } from "../../interfaces/Turns";
 
 interface Props
   extends StackScreenProps<SearchStackParamList, "ComplexScreen"> {}
 
 export const ComplexScreen = ({ route, navigation }: Props) => {
-  const { availableTurns, getAvailableTurns } = route.params;
+  const { availableTurns = [], getAvailableTurns = () => {} } = route.params;
   const [selectedTurn, setSelectedTurn] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDateString, setSelectedDateString] = useState(
     DateTime.local().toFormat("yyyy-MM-dd")
   );
+  const [selectedFieldId, setSelectedFieldId] = useState("");
   const { _id: playerId } = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
   const { top } = useSafeAreaInsets();
-  const { complex } = route.params;
+  const complex = route.params?.complex ?? false;
 
   useEffect(() => {
     navigation.setOptions({
@@ -67,19 +69,24 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
 
   const submitTurn = () => {
     dispatch(
-      createTurn({
-        playerId,
-        complexId: complex._id,
-        complexOwnerId: complex.ownerId,
-        startDate: DateTime.fromFormat(selectedTurn, "HH:mm"),
-        endDate: DateTime.fromFormat(selectedTurn, "HH:mm").plus({
-          hours: 1,
-        }),
-        fieldId: complex.FootballFields[0]._id,
-      })
+      createTurn(
+        {
+          playerId,
+          complexId: complex._id,
+          complexOwnerId: complex.ownerId,
+          startDate: DateTime.fromFormat(selectedTurn, "HH:mm"),
+          endDate: DateTime.fromFormat(selectedTurn, "HH:mm").plus({
+            hours: 1,
+          }),
+          fieldId: selectedFieldId,
+        },
+        (turn: Turn) => {
+          navigation.replace("BookedTurnScreen", { turn });
+        }
+      )
     );
-    setModalVisible(false);
-    navigation.pop();
+    //     setModalVisible(false);
+    //     navigation.pop();
   };
 
   return (
@@ -217,6 +224,7 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
                     onTurnPress={(turnTime) => {
                       setSelectedTurn(turnTime.toFormat("HH:mm"));
                       setModalVisible(true);
+                      setSelectedFieldId(footballField._id);
                     }}
                     complex={complex}
                   />
@@ -232,27 +240,28 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
               rowGap: 8,
             }}
           >
-            {availableTurns.map(({ turnTime, available }, idx) => {
-              if (available)
-                return (
-                  <TouchableOpacity
-                    style={{
-                      ...cardStyle,
-                      flex: 0,
-                      paddingVertical: 4,
-                      paddingHorizontal: 8,
-                    }}
-                    key={`available-turn-${idx}`}
-                    onPress={() => {
-                      setSelectedTurn(turnTime.toFormat("HH:mm"));
-                      setModalVisible(true);
-                    }}
-                  >
-                    <Text>{turnTime.toFormat("HH:mm")}</Text>
-                  </TouchableOpacity>
-                );
-              else return null;
-            })}
+            {availableTurns &&
+              availableTurns.map(({ turnTime, available }, idx) => {
+                if (available)
+                  return (
+                    <TouchableOpacity
+                      style={{
+                        ...(cardStyle as Object),
+                        flex: 0,
+                        paddingVertical: 4,
+                        paddingHorizontal: 8,
+                      }}
+                      key={`available-turn-${idx}`}
+                      onPress={() => {
+                        setSelectedTurn(turnTime.toFormat("HH:mm"));
+                        setModalVisible(true);
+                      }}
+                    >
+                      <Text>{turnTime.toFormat("HH:mm")}</Text>
+                    </TouchableOpacity>
+                  );
+                else return null;
+              })}
           </View>
         </View>
         <TouchableOpacity

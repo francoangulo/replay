@@ -27,6 +27,10 @@ const screens = [
         {...(focused && { color: colors.primary })}
       />
     ),
+    initialParams: (turnIdParam: string) => {
+      console.log("returning: ", turnIdParam);
+      return { turnIdParam };
+    },
   },
   {
     name: "Settings",
@@ -41,7 +45,9 @@ const screens = [
   },
 ];
 
-export const OwnersTabNavigator = () => {
+export const OwnersTabNavigator = ({ route }) => {
+  const turnIdParam = route.params?.turnIdParam ?? "";
+  console.log("franco turn Id", JSON.stringify(turnIdParam, null, 4));
   const { _id: ownerId } = useAppSelector(selectAuth);
   const { loadingOwnerTurns: loadingTurns } = useAppSelector(selectTurns);
   const { loading } = useAppSelector(selectOwnerComplexes);
@@ -63,16 +69,21 @@ export const OwnersTabNavigator = () => {
         tabBarLabel: () => <></>,
       }}
     >
-      {screens.map(({ name, component, icon }, index) => (
-        <Tab.Screen
-          key={`owner-tab-${index}`}
-          name={name}
-          component={component}
-          options={{
-            tabBarIcon: ({ focused }) => icon(focused),
-          }}
-        />
-      ))}
+      {screens.map(({ name, component, icon, initialParams }, index) => {
+        const params = initialParams && initialParams(turnIdParam);
+        return (
+          <Tab.Screen
+            key={`owner-tab-${index}`}
+            name={name}
+            component={component}
+            options={{
+              tabBarIcon: ({ focused }) => icon(focused),
+            }}
+            initialParams={params}
+            //     {...(initialParams && initialParams(turnIdParam))}
+          />
+        );
+      })}
     </Tab.Navigator>
   );
 };

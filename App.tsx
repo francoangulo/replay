@@ -8,11 +8,26 @@ import { OnboardingNavigator } from "./src/mainNavigation/navigators/OnboardingN
 import { enableLatestRenderer } from "react-native-maps";
 
 enableLatestRenderer();
+const config = {
+  screens: {
+    LoginScreen: {
+      path: "login/:email/:turnId",
+      screens: {
+        OwnersHomeScreen: "home",
+      },
+    },
+  },
+};
+const linking = {
+  prefixes: ["replay://"],
+  /* configuration for matching screens with paths */
+  config,
+};
 
 export const App = (): JSX.Element => {
   return (
     <Provider store={store}>
-      <NavigationContainer>
+      <NavigationContainer linking={linking}>
         <OnboardingNavigator />
       </NavigationContainer>
     </Provider>

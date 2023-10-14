@@ -74,7 +74,7 @@ export const getOwnerComplexes =
     try {
       const params = { ownerId };
       const resp = await axios.get<ComplexesResponse>(
-        "http://localhost:3000/complexes",
+        "http://192.168.100.178:3000/complexes",
         { params }
       );
       console.log("resp", JSON.stringify(resp, null, 4));
