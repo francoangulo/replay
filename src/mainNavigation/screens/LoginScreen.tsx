@@ -9,77 +9,47 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, paddings } from "../../theme/appTheme";
-import {
-  loginOwner,
-  loginPlayer,
-  selectAuth,
-} from "../../redux/slices/authSlice";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux";
-import axios from "axios";
-import { AllOwnersResponse } from "../../interfaces/Owners";
-import { PlayersResponse } from "../../interfaces/Players";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loginOwner, loginUser } from "../../redux/slices/authSlice";
+import { useAppDispatch } from "../../hooks/redux";
+import { StackActions } from "@react-navigation/native";
 
 interface Props extends StackScreenProps<any, any> {}
 
 export const LoginScreen = ({ navigation, route }: Props) => {
   const emailParam = route.params?.email ?? "";
   const turnIdParam = route.params?.turnId ?? "";
-  console.log("franco email param:", JSON.stringify(emailParam, null, 4));
-  const getUsers = async () => {
-    const response1 = await axios.get<AllOwnersResponse>(
-      "http://192.168.100.178:3000/owners"
-    );
-    const response2 = await axios.get<PlayersResponse>(
-      "http://192.168.100.178:3000/players"
-    );
-    const users = {
-      owners: response1.data.owners,
-      players: response2.data.players,
-    };
-    console.log("users", JSON.stringify(users, null, 4));
-  };
+
   useEffect(() => {
     if (emailParam) {
       dispatch(loginOwner(emailParam));
 
       navigation.replace("OwnersNavigator", { turnIdParam });
     }
-    getUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [ownerMode, setOwnerMode] = useState(false);
-  const authState = useAppSelector(selectAuth);
+
   const dispatch = useAppDispatch();
+
   const submitLogin = async () => {
-    console.log("DISPATCHING");
-    console.log("owner mode: ", ownerMode);
-
-    if (ownerMode) {
-      dispatch(loginOwner("francoangulo2001@gmail.com"));
-      navigation.replace("OwnersNavigator");
-    } else {
-      dispatch(
-        loginPlayer(email, password, () =>
-          navigation.replace("PlayersNavigator")
-        )
-      );
-    }
+    dispatch(
+      loginUser({
+        email,
+        password,
+        callback: (userType) => {
+          const destinationRoute =
+            userType && userType === "player"
+              ? "PlayersNavigator"
+              : "OwnersNavigator";
+          navigation.dispatch(
+            StackActions.replace(destinationRoute, { fromSplash: true })
+          );
+        },
+      })
+    );
   };
-  useEffect(() => {
-    console.log("authState", JSON.stringify(authState, null, 4));
-  }, [authState]);
-
-  const getToken = async () => {
-    const token = await AsyncStorage.getItem("TOKEN");
-    console.log("franco token", JSON.stringify(token, null, 4));
-  };
-
-  useEffect(() => {
-    getToken();
-  }, []);
 
   return (
     <SafeAreaView
@@ -88,7 +58,6 @@ export const LoginScreen = ({ navigation, route }: Props) => {
         alignItems: "center",
         flex: 1,
         padding: paddings.globalPadding,
-        ...(ownerMode && { backgroundColor: colors.primary }),
         rowGap: 32,
       }}
     >
@@ -141,23 +110,10 @@ export const LoginScreen = ({ navigation, route }: Props) => {
 
       <TouchableOpacity
         onPress={() => {
-          setOwnerMode(!ownerMode);
-          setEmail(ownerMode ? "francoangulo2001@gmail.com" : "");
-        }}
-      >
-        <Text style={{ color: ownerMode ? colors.appBg : colors.primary }}>
-          {ownerMode ? "Player?" : "Owner?"}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => {
           navigation.navigate("SignupScreen");
         }}
       >
-        <Text style={{ color: ownerMode ? colors.appBg : colors.primary }}>
-          Signup
-        </Text>
+        <Text style={{ color: colors.primary }}>Signup</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

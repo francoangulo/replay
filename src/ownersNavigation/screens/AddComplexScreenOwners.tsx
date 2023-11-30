@@ -44,8 +44,6 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
 
   useEffect(() => {
     if (modalState.visible === false && modalState.status === "success") {
-      console.log("FRANCO MUY BIEN");
-
       navigation.replace("AddFieldsScreen", {
         complexId: modalState.complexId,
       });
@@ -66,7 +64,6 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
 
   const selectPicture = async () => {
     const result = await launchImageLibrary({ mediaType: "photo" });
-    console.log(result?.assets && result?.assets[0]);
     result?.assets &&
       result?.assets[0].uri &&
       setComplexPicture(result.assets[0].uri);

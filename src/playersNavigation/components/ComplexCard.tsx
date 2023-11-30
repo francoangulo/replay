@@ -45,10 +45,6 @@ export const ComplexCard = ({ navigation, complex }: Props) => {
     <TouchableOpacity
       style={cardStyle}
       onPress={() => {
-        console.log(
-          "available turns my bro",
-          JSON.stringify(availableTurns, null, 4)
-        );
         navigation.navigate("ComplexScreen", {
           complex,
           availableTurns,

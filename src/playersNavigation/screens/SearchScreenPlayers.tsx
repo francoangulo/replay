@@ -36,8 +36,6 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
 
   const filterComplexes = (value: string) => {
     const filteringComplexes = complexes.filter(({ name }) => {
-      console.log({ name }, { value });
-
       return name.toLowerCase().includes(value.toLowerCase());
     });
     if (value.length === 0) return setFilteredComplexes(complexes);

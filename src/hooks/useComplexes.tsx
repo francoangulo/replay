@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { Complex, ComplexesResponse } from "../interfaces/complexes";
-import axios from "axios";
+import replayAPI from "../api/api";
 
 export const useComplexes = () => {
   const [complexes, setComplexes] = useState<Complex[]>();
   const getComplexes = async () => {
-    const response = await axios.get<ComplexesResponse>(
-      "http://192.168.100.178:3000/complexes"
-    );
+    const response = await replayAPI.get<ComplexesResponse>("/complexes");
     setComplexes(response.data.complexes);
   };
   useEffect(() => {

@@ -13,13 +13,12 @@ import { TextComponent } from "../../components/TextComponent";
 import { useAppSelector } from "../../hooks/redux";
 import { selectOwnerComplexes } from "../../redux/slices/ownerComplexesSlice";
 import { ScreenHeader } from "../components/ScreenHeader";
+import { ComplexCard } from "../components/ComplexCard";
 
 interface Props extends StackScreenProps<any, any> {}
 
 export const AdminComplexesScreenOwner = ({ navigation, route }: Props) => {
   const { ownerComplexes } = useAppSelector(selectOwnerComplexes);
-
-  console.log("franco complejos", JSON.stringify(ownerComplexes, null, 4));
 
   return (
     <View style={{ flex: 1 }}>
@@ -40,29 +39,14 @@ export const AdminComplexesScreenOwner = ({ navigation, route }: Props) => {
           style={{ rowGap: 16, paddingBottom: 16 }}
         >
           {ownerComplexes?.map((complex, idx) => {
-            const { name, address } = complex;
             return (
-              <TouchableOpacity
-                activeOpacity={0.5}
-                onPress={() =>
+              <ComplexCard
+                key={`complex-${idx}`}
+                complex={complex}
+                onPressCallback={() =>
                   navigation.navigate("ComplexScreen", { complex })
                 }
-                style={styles.complexCard}
-                key={`complex-${idx}`}
-              >
-                <View style={{ rowGap: 8 }}>
-                  <TextComponent type="subtitle">{name}</TextComponent>
-                  <TextComponent type="text">{address}</TextComponent>
-                </View>
-                <View>
-                  <Image
-                    style={{ width: 100, height: 60, borderRadius: 4 }}
-                    source={{
-                      uri: "https://www.argfc.com/wp-content/uploads/2020/10/futbol555.jpg",
-                    }}
-                  />
-                </View>
-              </TouchableOpacity>
+              />
             );
           })}
         </ScrollView>
@@ -84,11 +68,3 @@ export const AdminComplexesScreenOwner = ({ navigation, route }: Props) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  complexCard: {
-    ...(cardStyle as Object),
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-});

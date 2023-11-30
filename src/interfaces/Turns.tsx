@@ -12,6 +12,10 @@ export interface CreateTurnResponse {
   newTurn: Turn;
 }
 
+export interface ConfirmTurnResponse {
+  confirmedTurn: Turn;
+}
+
 export interface Turn {
   _id: string;
   startDate: string;
@@ -25,6 +29,7 @@ export interface Turn {
   createdAt: string;
   updatedAt: string;
   fieldId: string;
+  fieldNumber: number;
   playerId: null;
   complexId: string;
   complexOwnerId: string;

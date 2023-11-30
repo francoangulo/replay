@@ -1,12 +1,13 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
 import { AppDispatch, RootState } from "../store";
 import {
   Turn,
   TurnsResponse,
   CreateTurnResponse,
+  ConfirmTurnResponse,
 } from "../../interfaces/Turns";
 import { DateTime } from "luxon";
+import replayAPI from "../../api/api";
 
 // Define a type for the slice state
 export interface OwnerTurnsState {
@@ -42,6 +43,17 @@ export const ownerTurnsSlice = createSlice({
         loadingAllTurns: false,
       };
     },
+    updateTurn: (state, action: PayloadAction<Turn>) => {
+      const updatedTurns = state.allTurns.map((turn) => {
+        if (turn._id === action.payload._id) return action.payload;
+        return turn;
+      });
+      return {
+        ...state,
+        allTurns: [...updatedTurns],
+        loadingAllTurns: false,
+      };
+    },
     resetAllTurns: (state) => {
       return {
         ...state,
@@ -55,16 +67,14 @@ export const ownerTurnsSlice = createSlice({
 const { setOwnerTurns } = ownerTurnsSlice.actions;
 const { setAllTurns } = ownerTurnsSlice.actions;
 const { resetAllTurns } = ownerTurnsSlice.actions;
+const { updateTurn } = ownerTurnsSlice.actions;
 
 export const getOwnerTurns =
   (ownerId: string) => async (dispatch: AppDispatch) => {
     try {
       const params = { complexOwnerId: ownerId };
-      const resp = await axios.get<TurnsResponse>(
-        "http://192.168.100.178:3000/turns",
-        { params }
-      );
-      console.log("resp", JSON.stringify(resp, null, 4));
+      const resp = await replayAPI.get<TurnsResponse>("/turns", { params });
+      console.log("turns resp", JSON.stringify(resp.data.turns, null, 4));
       dispatch(setOwnerTurns(resp.data.turns));
     } catch (error) {
       console.log({ error });
@@ -73,10 +83,7 @@ export const getOwnerTurns =
 
 export const getAllTurns = () => async (dispatch: AppDispatch) => {
   try {
-    const resp = await axios.get<TurnsResponse>(
-      "http://192.168.100.178:3000/turns"
-    );
-    console.log("resp", JSON.stringify(resp, null, 4));
+    const resp = await replayAPI.get<TurnsResponse>("/turns");
     dispatch(setAllTurns(resp.data.turns));
   } catch (error) {
     console.log({ error });
@@ -89,6 +96,7 @@ interface TurnProps {
   endDate: DateTime;
   complexId: string;
   fieldId: string;
+  fieldNumber: number;
   complexOwnerId: string;
 }
 
@@ -100,16 +108,22 @@ export const createTurn =
       complexOwnerId,
       endDate,
       fieldId,
+      fieldNumber,
       startDate,
     }: TurnProps,
     callback: (newTurn: Turn) => void = () => {}
   ) =>
   async (dispatch: AppDispatch) => {
     try {
-      const resp = await axios.post<CreateTurnResponse>(
-        "http://192.168.100.178:3000/turns",
-        { playerId, complexId, complexOwnerId, endDate, fieldId, startDate }
-      );
+      const resp = await replayAPI.post<CreateTurnResponse>("/turns", {
+        playerId,
+        complexId,
+        complexOwnerId,
+        endDate,
+        fieldId,
+        fieldNumber,
+        startDate,
+      });
       dispatch(setAllTurns([resp.data.newTurn]));
       callback(resp.data.newTurn);
     } catch (error) {
@@ -118,18 +132,30 @@ export const createTurn =
   };
 
 export const emptyTurns = () => async (dispatch: AppDispatch) => {
-  console.log("REMOVING??");
-
   try {
-    const resp = await axios.delete<CreateTurnResponse>(
-      "http://192.168.100.178:3000/turns/all"
-    );
-    console.log("resp", JSON.stringify(resp.data, null, 4));
+    const resp = await replayAPI.delete<CreateTurnResponse>("/turns/all");
     dispatch(resetAllTurns());
   } catch (error) {
     console.log({ error });
   }
 };
+
+export const confirmTurn =
+  (
+    { turnId }: { turnId: string },
+    callback: (newTurn: Turn) => void = () => {}
+  ) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      const resp = await replayAPI.post<ConfirmTurnResponse>("/turns/confirm", {
+        turnId,
+      });
+      dispatch(updateTurn(resp.data.confirmedTurn));
+      callback(resp.data.confirmedTurn);
+    } catch (error) {
+      console.log({ error });
+    }
+  };
 
 export const selectTurns = (state: RootState) => state.turns;
 

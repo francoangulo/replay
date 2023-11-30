@@ -54,13 +54,10 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
 
   useEffect(() => {
     if (modalState.visible === false && modalState.status === "success") {
-      console.log("FRANCO MUY BIEN");
-
       navigation.pop();
     }
   }, [modalState]);
 
-  console.log("franco route", JSON.stringify(route, null, 4));
   const complexId = route?.params?.complexId;
 
   const submitComplex = () => {
@@ -68,7 +65,6 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
       setModalState({ visible: true, status: "success", autoDismiss: true });
     } else {
       const errors = schedulesHaveErrors();
-      console.log("franco errores", JSON.stringify(errors, null, 4));
       if (errors) return;
       setModalState({ visible: true, status: "loading", autoDismiss: false });
       dispatch(postFootballFields({ body: { fieldsAmount, complexId } }));

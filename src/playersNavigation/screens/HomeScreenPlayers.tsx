@@ -1,17 +1,18 @@
 import React from "react";
-import { Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "../../hooks/redux";
-import { selectComplexes } from "../../redux/slices/complexesSlice";
-import { cardStyle } from "../../theme/appTheme";
 import { StackScreenProps } from "@react-navigation/stack";
 import MapView from "react-native-maps";
+import { TextComponent } from "../../components/TextComponent";
+import { selectAuth } from "../../redux/slices/authSlice";
 
 interface Props extends StackScreenProps<any, any> {}
 
 export const HomeScreenPlayers = ({ navigation }: Props) => {
+  const user = useAppSelector(selectAuth);
   return (
     <SafeAreaView style={{ padding: 16, flex: 1 }}>
+      <TextComponent type="title">Bienvenido {user.name}!</TextComponent>
       <MapView
         initialRegion={{
           latitude: 37.78825,

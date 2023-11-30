@@ -12,7 +12,6 @@ interface Props
 
 export const BookedTurnScreen = ({ navigation, route }: Props) => {
   const turn = route.params?.turn;
-  console.log("franco turn: ", JSON.stringify(turn, null, 4));
   const screenshotRef = useRef(null);
 
   const onCapture = useCallback(async () => {

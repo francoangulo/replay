@@ -12,6 +12,7 @@ import { SettingsScreenPlayers } from "../screens/SettingsScreenPlayers";
 import { HomeNavigatorPlayers } from "./HomeNavigatorPlayers";
 import { getAllTurns, selectTurns } from "../../redux/slices/turnsSlice";
 import { SearchNavigatorPlayers } from "./SearchNavigatorPlayers";
+import SplashScreen from "react-native-splash-screen";
 
 const Tab = createBottomTabNavigator();
 
@@ -33,7 +34,7 @@ const screens = [
   },
 ];
 
-export const PlayersTabNavigator = () => {
+export const PlayersTabNavigator = ({ route }) => {
   const { loading } = useAppSelector(selectComplexes);
   const { loadingAllTurns } = useAppSelector(selectTurns);
   const dispatch = useAppDispatch();
@@ -41,10 +42,10 @@ export const PlayersTabNavigator = () => {
   useEffect(() => {
     loading && dispatch(getComplexes());
     loadingAllTurns && dispatch(getAllTurns());
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log("franco loading", JSON.stringify(loading, null, 4));
   if (loading) return <ActivityIndicator size={20} />;
 
   return (

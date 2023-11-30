@@ -1,9 +1,9 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
 import { AppDispatch, RootState } from "../store";
 import { Complex, ComplexesResponse } from "../../interfaces/complexes";
 import { NewFootballField } from "../../interfaces/FootballFields";
 import { ComplexSchedule } from "../../interfaces/ComplexesSchedules";
+import replayAPI from "../../api/api";
 
 // Define a type for the slice state
 export interface OwnerComplexesState {
@@ -19,7 +19,6 @@ export const ownerComplexesSlice = createSlice({
   initialState,
   reducers: {
     setOwnerComplexes: (state, action: PayloadAction<Complex[]>) => {
-      console.log("action", JSON.stringify(action, null, 4));
       return {
         ownerComplexes: [...state.ownerComplexes, ...action.payload],
         loading: false,
@@ -73,11 +72,9 @@ export const getOwnerComplexes =
   (ownerId: string) => async (dispatch: AppDispatch) => {
     try {
       const params = { ownerId };
-      const resp = await axios.get<ComplexesResponse>(
-        "http://192.168.100.178:3000/complexes",
-        { params }
-      );
-      console.log("resp", JSON.stringify(resp, null, 4));
+      const resp = await replayAPI.get<ComplexesResponse>("/complexes", {
+        params,
+      });
       dispatch(setOwnerComplexes(resp.data.complexes));
     } catch (error) {
       console.log({ error });

@@ -1,5 +1,4 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
 import { AppDispatch, RootState } from "../store";
 import {
   Complex,
@@ -22,6 +21,7 @@ import {
   ComplexSchedule,
   PostMultipleSchedulesResponse,
 } from "../../interfaces/ComplexesSchedules";
+import replayAPI from "../../api/api";
 
 // Define a type for the slice state
 export interface ComplexesState {
@@ -86,9 +86,7 @@ const {
 
 export const getComplexes = () => async (dispatch: AppDispatch) => {
   try {
-    const resp = await axios.get<ComplexesResponse>(
-      "http://192.168.100.178:3000/complexes"
-    );
+    const resp = await replayAPI.get<ComplexesResponse>("/complexes");
     dispatch(setComplexes(resp.data.complexes));
   } catch (error) {
     console.log({ error });
@@ -103,10 +101,9 @@ interface PostComplexProps {
 export const postComplex =
   ({ body, callback = () => {} }: PostComplexProps) =>
   async (dispatch: AppDispatch) => {
-    console.log("franco body", JSON.stringify(body, null, 4));
     try {
-      const resp = await axios.post<PostComplexResponse>(
-        "http://192.168.100.178:3000/complexes",
+      const resp = await replayAPI.post<PostComplexResponse>(
+        "/complexes",
         body
       );
       dispatch(setComplexes([resp.data.newComplex]));
@@ -121,11 +118,9 @@ export const deleteComplex =
   (complexId: string, callback: () => void = () => {}) =>
   async (dispatch: AppDispatch) => {
     try {
-      const resp = await axios.delete<DeleteComplexResponse>(
-        "http://192.168.100.178:3000/complexes",
-        { data: { complexId } }
-      );
-      console.log("response", JSON.stringify(resp.data, null, 4));
+      const resp = await replayAPI.delete<DeleteComplexResponse>("/complexes", {
+        data: { complexId },
+      });
 
       dispatch(removeComplex(complexId));
       dispatch(removeOwnerComplex(complexId));
@@ -146,10 +141,9 @@ interface PostFootballFieldsProps {
 export const postFootballFields =
   ({ body, callback = () => {} }: PostFootballFieldsProps) =>
   async (dispatch: AppDispatch) => {
-    console.log("franco body", JSON.stringify(body, null, 4));
     try {
-      const resp = await axios.post<PostMultipleFieldsResponse>(
-        "http://192.168.100.178:3000/football-fields/by-number",
+      const resp = await replayAPI.post<PostMultipleFieldsResponse>(
+        "/football-fields/by-number",
         body
       );
       dispatch(
@@ -188,11 +182,9 @@ interface PostComplexSchedulesProps {
 export const postComplexSchedules =
   ({ body, callback = () => {} }: PostComplexSchedulesProps) =>
   async (dispatch: AppDispatch) => {
-    console.log("franco body", JSON.stringify(body, null, 4));
-
     try {
-      const resp = await axios.post<PostMultipleSchedulesResponse>(
-        "http://192.168.100.178:3000/complexes-schedules/multiple",
+      const resp = await replayAPI.post<PostMultipleSchedulesResponse>(
+        "/complexes-schedules/multiple",
         body
       );
       dispatch(

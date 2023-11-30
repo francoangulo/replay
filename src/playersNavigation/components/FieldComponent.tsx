@@ -20,7 +20,6 @@ export const FieldComponent = ({
   onTurnPress,
   complex,
 }: Props) => {
-  console.log("available turns", JSON.stringify(availableTurns, null, 4));
   return (
     <View style={cardStyle}>
       <View style={{ flexDirection: "row" }}>

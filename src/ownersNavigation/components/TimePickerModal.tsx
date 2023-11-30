@@ -54,7 +54,6 @@ export const TimePickerModal = ({
             locale="es_AR"
             title={"Selecciona la hora de Apertura"}
             onDateChange={(date) => {
-              console.log("franco date ", JSON.stringify(date, null, 4));
               setCurrentPickingDate(date);
             }}
           />

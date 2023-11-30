@@ -285,9 +285,6 @@ export const useAddFields = () => {
       isOpening && isClosing && (scheduleType = "both");
     }
 
-    console.log("franco empty", JSON.stringify(emptyIdx, null, 4));
-    console.log("franco overlaping", JSON.stringify(overlapingIdx, null, 4));
-
     if (emptyIdx > -1) {
       setScheduleError({
         scheduleIdx: [emptyIdx],

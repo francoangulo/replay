@@ -1,9 +1,10 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { Owner, OwnerResponse } from "../../interfaces/Owners";
-import axios from "axios";
 import { AppDispatch, RootState } from "../store";
 import { LoginPlayerResponse, Player } from "../../interfaces/Players";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { saveToken, saveUserId } from "../../helpers/asyncStorage";
+import { LoginUserResponse } from "../../interfaces/Users";
+import replayAPI from "../../api/api";
 
 export interface OwnerAuthState extends Owner {
   userType: "owner" | null;
@@ -37,39 +38,110 @@ export const authSlice = createSlice({
 const { login } = authSlice.actions;
 
 export const loginOwner = (email: string) => async (dispatch: AppDispatch) => {
+  console.log(
+    "franco url",
+    JSON.stringify(replayAPI.defaults.baseURL, null, 4)
+  );
   try {
     const params = { email };
-    const resp = await axios.get<OwnerResponse>(
-      "http://192.168.100.178:3000/owners",
-      { params }
-    );
-    console.log("franco respuesta", JSON.stringify(resp.data, null, 4));
+    const resp = await replayAPI.get<OwnerResponse>("/owners", { params });
     dispatch(login({ ...resp.data.owner, userType: "owner" }));
   } catch (error) {
     console.log({ error });
   }
 };
 
+interface LoginProps {
+  email?: string;
+  password?: string;
+  callback?: (userType?: string) => void;
+  userId?: string;
+  token?: string;
+}
+
 export const loginPlayer =
-  (email: string, password: string, callback: () => void) =>
+  ({ email, password, callback, userId, token }: LoginProps) =>
   async (dispatch: AppDispatch) => {
+    console.log(
+      "franco url",
+      JSON.stringify(replayAPI.defaults.baseURL, null, 4)
+    );
     try {
-      const params = { email, password };
-      const resp = await axios.post<LoginPlayerResponse>(
-        "http://192.168.100.178:3000/players/login",
-        params
-      );
-      console.log("franco respuesxta", JSON.stringify(resp.data, null, 4));
-      if (resp.data.status === "success") {
+      if (email && password) {
+        const params = { email, password };
+        const res = await replayAPI.post<LoginPlayerResponse>(
+          "/players/login",
+          params
+        );
+        if (res.data.status === "success") {
+          dispatch(login({ ...res.data.player, userType: "player" }));
+
+          await saveToken(res.data.token);
+          await saveUserId(res.data.player._id);
+
+          callback && callback();
+        }
+      } else {
+        const params = { userId, token };
+        const resp = await replayAPI.post<LoginPlayerResponse>(
+          "/players/login",
+          params
+        );
         dispatch(login({ ...resp.data.player, userType: "player" }));
-
-        await AsyncStorage.setItem("TOKEN", resp.data.token);
-        await AsyncStorage.setItem("USER", resp.data.player._id);
-
-        callback();
+        callback && callback("player");
       }
     } catch (error) {
-      console.log({ errorFranco: error });
+      console.log({ error });
+    }
+  };
+
+export const loginUser =
+  ({ email, password, callback, userId, token }: LoginProps) =>
+  async (dispatch: AppDispatch) => {
+    console.log(
+      "franco url",
+      JSON.stringify(replayAPI.defaults.baseURL, null, 4)
+    );
+    try {
+      if (email && password) {
+        const body = { email, password };
+        const res = await replayAPI.post<LoginUserResponse>(
+          "/users/login",
+          body
+        );
+        if (res.data.status === "success") {
+          if (res.data?.player) {
+            dispatch(login({ ...res.data.player, userType: "player" }));
+            await saveUserId(res.data.player._id);
+            await saveToken(res.data.token);
+            callback && callback("player");
+          }
+
+          if (res.data?.owner) {
+            dispatch(login({ ...res.data.owner, userType: "owner" }));
+            await saveUserId(res.data.owner._id);
+            await saveToken(res.data.token);
+            callback && callback("owner");
+          }
+        }
+      } else {
+        const params = { userId, token };
+        const res = await replayAPI.post<LoginUserResponse>(
+          "/users/login",
+          //     "http://localhost:3000/users/login",
+          params
+        );
+        if (res.data?.player) {
+          dispatch(login({ ...res.data.player, userType: "player" }));
+          callback && callback("player");
+        }
+        if (res.data?.owner) {
+          dispatch(login({ ...res.data.owner, userType: "owner" }));
+          callback && callback("owner");
+        }
+      }
+    } catch (error) {
+      console.log({ error, msg: "this is" });
     }
   };
 
@@ -85,17 +157,13 @@ export const registerPlayer =
   async (dispatch: AppDispatch) => {
     try {
       const params = { name, lastName, phoneNumber, email, password };
-      const resp = await axios.post<{ status: string }>(
-        "http://192.168.100.178:3000/players",
-        params
-      );
-      console.log("franco respuesta", JSON.stringify(resp.data, null, 4));
+      const resp = await replayAPI.post<{ status: string }>("/players", params);
       if (resp.data.status === "success") {
         callback();
       }
       // dispatch(login({ ...resp.data.player, userType: "player" }));
     } catch (error) {
-      console.log({ errorFranco: error });
+      console.log({ error });
     }
   };
 

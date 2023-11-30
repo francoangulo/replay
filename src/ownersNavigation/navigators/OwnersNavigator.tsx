@@ -1,5 +1,8 @@
 import React, { useEffect } from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import {
+  BottomTabScreenProps,
+  createBottomTabNavigator,
+} from "@react-navigation/bottom-tabs";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import { colors } from "../../theme/appTheme";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
@@ -10,16 +13,24 @@ import {
   selectOwnerComplexes,
 } from "../../redux/slices/ownerComplexesSlice";
 import { getOwnerTurns, selectTurns } from "../../redux/slices/turnsSlice";
-import { OwnersHomeScreen } from "../screens/OwnersHomeScreen";
 import { ProfileNavigatorOwners } from "./ProfileNavigatorOwners";
 import ADIcon from "react-native-vector-icons/AntDesign";
+import { OnboardingTabsParamsList } from "../../mainNavigation/navigators/OnboardingNavigator";
+import { CalendarNavigator } from "./CalendarNavigator";
+import { HomeNavigator } from "./HomeNavigator";
 
-const Tab = createBottomTabNavigator();
+export type TabsParamsList = {
+  HomeNavigator: { turnIdParam?: string };
+  CalendarNavigator: undefined;
+  SettingsNavigator: undefined;
+};
+
+const Tab = createBottomTabNavigator<TabsParamsList>();
 
 const screens = [
   {
-    name: "Home",
-    component: OwnersHomeScreen,
+    name: "HomeNavigator",
+    component: HomeNavigator,
     icon: (focused: boolean) => (
       <IonIcon
         name={"home-outline"}
@@ -28,12 +39,25 @@ const screens = [
       />
     ),
     initialParams: (turnIdParam: string) => {
-      console.log("returning: ", turnIdParam);
       return { turnIdParam };
     },
   },
   {
-    name: "Settings",
+    name: "CalendarNavigator",
+    component: CalendarNavigator,
+    icon: (focused: boolean) => (
+      <IonIcon
+        name={"calendar-outline"}
+        size={24}
+        {...(focused && { color: colors.primary })}
+      />
+    ),
+    initialParams: (turnIdParam: string) => {
+      return { turnIdParam };
+    },
+  },
+  {
+    name: "SettingsNavigator",
     component: ProfileNavigatorOwners,
     icon: (focused: boolean) => (
       <ADIcon
@@ -45,9 +69,10 @@ const screens = [
   },
 ];
 
-export const OwnersTabNavigator = ({ route }) => {
+type Props = BottomTabScreenProps<OnboardingTabsParamsList, "OwnersNavigator">;
+
+export const OwnersTabNavigator = ({ route }: Props) => {
   const turnIdParam = route.params?.turnIdParam ?? "";
-  console.log("franco turn Id", JSON.stringify(turnIdParam, null, 4));
   const { _id: ownerId } = useAppSelector(selectAuth);
   const { loadingOwnerTurns: loadingTurns } = useAppSelector(selectTurns);
   const { loading } = useAppSelector(selectOwnerComplexes);
@@ -59,7 +84,9 @@ export const OwnersTabNavigator = ({ route }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ownerId]);
 
-  if (loading) return <ActivityIndicator size={20} />;
+  if (loading) {
+    return <ActivityIndicator size={20} />;
+  }
 
   return (
     <Tab.Navigator
@@ -70,7 +97,8 @@ export const OwnersTabNavigator = ({ route }) => {
       }}
     >
       {screens.map(({ name, component, icon, initialParams }, index) => {
-        const params = initialParams && initialParams(turnIdParam);
+        const params =
+          (initialParams && initialParams(turnIdParam)) || undefined;
         return (
           <Tab.Screen
             key={`owner-tab-${index}`}

@@ -27,6 +27,7 @@ export const useAvailableTurns = ({ complex, turns }: Props) => {
     useState<boolean>(true);
 
   const getAvailableTurns = (selectedDate: DateTime = DateTime.now()) => {
+    console.log("franco selected date", JSON.stringify(selectedDate, null, 4));
     const turnsAccumulator: AvailableTurn[] = [];
     setAvailableTurns([]);
     complex.FootballFields.forEach((footballField) => {
@@ -41,6 +42,8 @@ export const useAvailableTurns = ({ complex, turns }: Props) => {
           hour: openingHour,
           minute: openingMinute,
           day: selectedDate.get("day"),
+          month: selectedDate.get("month"),
+          year: selectedDate.get("year"),
         });
         if (!complexSchedule.weekDays.includes(openingDate.weekday - 1)) return;
         const closingDate = DateTime.fromObject({
@@ -48,9 +51,18 @@ export const useAvailableTurns = ({ complex, turns }: Props) => {
           hour: closingHour - 1,
           minute: closingMinute,
           day: selectedDate.get("day"),
+          month: selectedDate.get("month"),
+          year: selectedDate.get("year"),
         });
 
-        console.log("franco opening at", JSON.stringify(openingDate, null, 4));
+        console.log(
+          "franco opening date",
+          JSON.stringify(openingDate, null, 4)
+        );
+        console.log(
+          "franco closing date",
+          JSON.stringify(closingDate, null, 4)
+        );
 
         const hoursDiff = closingDate.diff(openingDate, "hours").toObject();
 
@@ -61,8 +73,6 @@ export const useAvailableTurns = ({ complex, turns }: Props) => {
         let lastTurn = openingDate.minus({ minutes: 30 });
         const createdTurns = availableTurnsHours.map(() => {
           const newHalfTurn = lastTurn.plus({ minutes: 30 });
-
-          console.log("franco turns", JSON.stringify(turns, null, 4));
 
           const notAvailable =
             turns.some((turn) => {
@@ -76,6 +86,10 @@ export const useAvailableTurns = ({ complex, turns }: Props) => {
                   newHalfTurn.toMillis() === turnStart.toMillis())
               );
             }) || newHalfTurn.valueOf() < DateTime.local().valueOf();
+          console.log(
+            "franco new half turn",
+            JSON.stringify(newHalfTurn, null, 4)
+          );
           lastTurn = newHalfTurn;
           const pushingTurn = {
             turnTime: newHalfTurn,
@@ -90,6 +104,10 @@ export const useAvailableTurns = ({ complex, turns }: Props) => {
       });
     });
     setAvailableTurns([...turnsAccumulator]);
+    console.log(
+      "franco turns accumulator",
+      JSON.stringify(turnsAccumulator, null, 4)
+    );
     return turnsAccumulator;
   };
   const formattedTurns = availableTurns.map(({ turnTime }) =>
