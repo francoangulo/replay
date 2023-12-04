@@ -68,3 +68,6 @@ yarn-error.log
 
 # testing
 /coverage
+
+# .env temp files
+ios/tmp.xcconfig
