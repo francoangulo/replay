@@ -2,7 +2,7 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { colors } from "../../theme/appTheme";
 import { OwnersHomeScreen } from "../screens/OwnersHomeScreen";
-import { TurnScreen } from "../screens/TurnScreen";
+import { TurnScreen } from "../../sharedNavigation/screens/TurnScreen";
 import { Turn } from "../../interfaces/Turns";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { TabsParamsList } from "./OwnersNavigator";

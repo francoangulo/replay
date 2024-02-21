@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { cardStyle, cardTitleStyle, colors } from "../../theme/appTheme";
 import { FootballField } from "../../interfaces/FootballFields";
 import { AvailableTurn } from "../../hooks/useAvailableTurns";
@@ -20,27 +20,11 @@ export const FieldComponent = ({
   onTurnPress,
   complex,
 }: Props) => {
+  const onlyAvailableTurns = availableTurns.filter(
+    ({ available }) => available
+  );
   return (
     <View style={cardStyle}>
-      <View style={{ flexDirection: "row" }}>
-        <Text style={cardTitleStyle}>Cancha {footballField.fieldNumber}</Text>
-        {complex.ComplexSchedules.map(({ openingTime, closingTime }) => {
-          return (
-            <Text
-              style={{
-                color: "gray",
-                borderRightWidth: 1,
-                borderRightColor: "black",
-                marginLeft: 12,
-              }}
-            >
-              {DateTime.fromFormat(openingTime, "HH:mm:ss").toFormat("HH:mm")} -{" "}
-              {DateTime.fromFormat(closingTime, "HH:mm:ss").toFormat("HH:mm")}
-            </Text>
-          );
-        })}
-      </View>
-      <Text style={{ marginTop: 16 }}>Turnos disponibles</Text>
       <View
         style={{
           flexDirection: "row",
@@ -50,33 +34,35 @@ export const FieldComponent = ({
           flexWrap: "wrap",
         }}
       >
-        {availableTurns && availableTurns.length
-          ? availableTurns.map(({ turnTime, available }) => {
-              if (available)
-                return (
-                  <TouchableOpacity
-                    style={{ flexShrink: 0 }}
-                    onPress={() => onTurnPress(turnTime)}
-                  >
-                    <Text
-                      style={{
-                        color: colors.primary,
-                        borderWidth: 1,
-                        borderColor: colors.primary,
-                        borderRadius: 4,
-                        paddingHorizontal: 8,
-                        paddingVertical: 4,
-                        minWidth: 60,
-                        textAlign: "center",
-                      }}
-                    >
-                      {turnTime.toFormat("HH:mm")}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              else return null;
-            })
-          : null}
+        <FlatList
+          horizontal
+          data={onlyAvailableTurns}
+          renderItem={({ item: { turnTime, available } }) => {
+            return (
+              <TouchableOpacity
+                style={{ flexShrink: 0 }}
+                onPress={() => onTurnPress(turnTime)}
+              >
+                <Text
+                  style={{
+                    color: colors.primary,
+                    borderWidth: 1,
+                    borderColor: colors.primary,
+                    borderRadius: 4,
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    minWidth: 60,
+                    textAlign: "center",
+                  }}
+                >
+                  {turnTime.toFormat("HH:mm")}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
+          keyExtractor={(item, index) => `field${item.fieldId}-turn${index}`}
+          ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+        />
       </View>
     </View>
   );

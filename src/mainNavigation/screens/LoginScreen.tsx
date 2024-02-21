@@ -12,6 +12,8 @@ import { colors, paddings } from "../../theme/appTheme";
 import { loginOwner, loginUser } from "../../redux/slices/authSlice";
 import { useAppDispatch } from "../../hooks/redux";
 import { StackActions } from "@react-navigation/native";
+import Config from "react-native-config";
+import { GenericButton } from "../../components/GenericButton";
 
 interface Props extends StackScreenProps<any, any> {}
 
@@ -51,6 +53,44 @@ export const LoginScreen = ({ navigation, route }: Props) => {
     );
   };
 
+  const submitDevPlayer = async () => {
+    console.log("hello=");
+
+    dispatch(
+      loginUser({
+        email: "francoplayer@gmail.com",
+        password: "franco2001",
+        callback: (userType) => {
+          const destinationRoute =
+            userType && userType === "player"
+              ? "PlayersNavigator"
+              : "OwnersNavigator";
+          navigation.dispatch(
+            StackActions.replace(destinationRoute, { fromSplash: true })
+          );
+        },
+      })
+    );
+  };
+
+  const submitDevOwner = async () => {
+    dispatch(
+      loginUser({
+        email: "francoowner@gmail.com",
+        password: "franco2001",
+        callback: (userType) => {
+          const destinationRoute =
+            userType && userType === "player"
+              ? "PlayersNavigator"
+              : "OwnersNavigator";
+          navigation.dispatch(
+            StackActions.replace(destinationRoute, { fromSplash: true })
+          );
+        },
+      })
+    );
+  };
+
   return (
     <SafeAreaView
       style={{
@@ -61,60 +101,84 @@ export const LoginScreen = ({ navigation, route }: Props) => {
         rowGap: 32,
       }}
     >
-      <View
-        style={{ ...styles.card, backgroundColor: colors.cardBg, rowGap: 16 }}
-      >
-        <Text>{email}</Text>
-        <TextInput
-          style={{
-            width: "100%",
-            height: 40,
-            padding: 8,
-            backgroundColor: colors.appBg,
-            borderBottomColor: "black",
-          }}
-          defaultValue={email}
-          keyboardType="email-address"
-          onChangeText={setEmail}
-          placeholder="Ingresa tu email..."
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={{
-            width: "100%",
-            height: 40,
-            padding: 8,
-            backgroundColor: colors.appBg,
-            borderBottomColor: "black",
-          }}
-          defaultValue={password}
-          keyboardType="email-address"
-          onChangeText={setPassword}
-          placeholder="Ingresa tu contraseña..."
-          autoCapitalize="none"
-        />
-        <TouchableOpacity
-          onPress={() => {
-            submitLogin();
-          }}
-          style={{
-            backgroundColor: colors.primary,
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            borderRadius: 4,
-          }}
-        >
-          <Text style={{ color: colors.appBg, fontWeight: "bold" }}>Login</Text>
-        </TouchableOpacity>
-      </View>
+      {!["local", "localphy"].includes(Config.SELECTED_ENVIRONMENT) ? (
+        <>
+          <View
+            style={{
+              ...styles.card,
+              backgroundColor: colors.cardBg,
+              rowGap: 16,
+            }}
+          >
+            <Text>{email}</Text>
+            <TextInput
+              style={{
+                width: "100%",
+                height: 40,
+                padding: 8,
+                backgroundColor: colors.appBg,
+                borderBottomColor: "black",
+              }}
+              defaultValue={email}
+              keyboardType="email-address"
+              onChangeText={setEmail}
+              placeholder="Ingresa tu email..."
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TextInput
+              style={{
+                width: "100%",
+                height: 40,
+                padding: 8,
+                backgroundColor: colors.appBg,
+                borderBottomColor: "black",
+              }}
+              defaultValue={password}
+              keyboardType="email-address"
+              onChangeText={setPassword}
+              placeholder="Ingresa tu contraseña..."
+              autoCapitalize="none"
+            />
+            <TouchableOpacity
+              onPress={() => {
+                submitLogin();
+              }}
+              style={{
+                backgroundColor: colors.primary,
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                borderRadius: 4,
+              }}
+            >
+              <Text style={{ color: colors.appBg, fontWeight: "bold" }}>
+                Login
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate("SignupScreen");
-        }}
-      >
-        <Text style={{ color: colors.primary }}>Signup</Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("SignupScreen");
+            }}
+          >
+            <Text style={{ color: colors.primary }}>Signup</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <View>
+          <GenericButton
+            buttonText="PLAYER"
+            buttonType="secondary"
+            onButtonPress={submitDevPlayer}
+          />
+          <GenericButton
+            buttonText="OWNER"
+            buttonType="primary"
+            onButtonPress={submitDevOwner}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };

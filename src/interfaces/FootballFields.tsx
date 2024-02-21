@@ -1,6 +1,7 @@
 import { Turn } from "./Turns";
 
 export interface FootballField {
+  playersAmount: number;
   _id: string;
   fieldNumber: number;
   createdAt: string;

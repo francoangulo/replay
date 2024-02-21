@@ -22,6 +22,7 @@ import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { postComplex } from "../../redux/slices/complexesSlice";
 import { selectAuth } from "../../redux/slices/authSlice";
 import { FadeModal } from "../components/FadeModal";
+import { FadeModalState } from "../../interfaces/FadeModal";
 
 type Props = StackScreenProps<ProfileStackParamList, "AddComplexScreen">;
 interface FormErrors {
@@ -35,7 +36,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
   const dispatch = useAppDispatch();
   const { _id: ownerId } = useAppSelector(selectAuth);
 
-  const [modalState, setModalState] = useState({
+  const [modalState, setModalState] = useState<FadeModalState>({
     visible: false,
     status: "",
     complexId: "",
@@ -296,7 +297,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
       </KeyboardAvoidingView>
       <FadeModal
         modalState={modalState}
-        setModalVisible={setModalState}
+        setModalState={setModalState}
         modalContent={() => {
           return (
             <View>

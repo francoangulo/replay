@@ -12,7 +12,7 @@ import { SettingsScreenPlayers } from "../screens/SettingsScreenPlayers";
 import { HomeNavigatorPlayers } from "./HomeNavigatorPlayers";
 import { getAllTurns, selectTurns } from "../../redux/slices/turnsSlice";
 import { SearchNavigatorPlayers } from "./SearchNavigatorPlayers";
-import SplashScreen from "react-native-splash-screen";
+import { MapsNavigatorPlayers } from "./MapsNavigatorPlayer";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,6 +26,11 @@ const screens = [
     name: "SearchNavigator",
     component: SearchNavigatorPlayers,
     iconName: "search-outline",
+  },
+  {
+    name: "MapsNavigator",
+    component: MapsNavigatorPlayers,
+    iconName: "map-outline",
   },
   {
     name: "Settings",

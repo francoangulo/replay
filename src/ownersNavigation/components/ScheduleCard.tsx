@@ -86,7 +86,13 @@ export const ScheduleCard = ({
               Apertura
             </Text>
             <TouchableOpacity
-              style={{ flexDirection: "row", gap: 4 }}
+              style={{
+                flexDirection: "row",
+                gap: 4,
+                backgroundColor: colors.inputBg,
+                padding: 4,
+                borderRadius: 8,
+              }}
               onPress={() => {
                 onEditing({ scheduleIdx, editingSchedule: "opening" });
                 setPickerVisible(true);
@@ -94,20 +100,22 @@ export const ScheduleCard = ({
             >
               <Text
                 style={{
-                  backgroundColor: colors.appBg,
+                  backgroundColor: `${colors.appBg}`,
                   padding: 2,
                   ...(openingError && { color: colors.danger }),
                   fontSize: 20,
+                  borderRadius: 4,
                 }}
               >
                 {openingHour[0]}
               </Text>
               <Text
                 style={{
-                  backgroundColor: colors.appBg,
+                  backgroundColor: `${colors.appBg}`,
                   padding: 2,
                   ...(openingError && { color: colors.danger }),
                   fontSize: 20,
+                  borderRadius: 4,
                 }}
               >
                 {openingHour[1]}
@@ -117,20 +125,22 @@ export const ScheduleCard = ({
               </Text>
               <Text
                 style={{
-                  backgroundColor: colors.appBg,
+                  backgroundColor: `${colors.appBg}`,
                   padding: 2,
                   ...(openingError && { color: colors.danger }),
                   fontSize: 20,
+                  borderRadius: 4,
                 }}
               >
                 {openingMinute[0]}
               </Text>
               <Text
                 style={{
-                  backgroundColor: colors.appBg,
+                  backgroundColor: `${colors.appBg}`,
                   padding: 2,
                   ...(openingError && { color: colors.danger }),
                   fontSize: 20,
+                  borderRadius: 4,
                 }}
               >
                 {openingMinute[1]}
@@ -142,7 +152,13 @@ export const ScheduleCard = ({
               Cierre
             </Text>
             <TouchableOpacity
-              style={{ flexDirection: "row", gap: 4 }}
+              style={{
+                flexDirection: "row",
+                gap: 4,
+                backgroundColor: "#e9e9e9",
+                padding: 4,
+                borderRadius: 8,
+              }}
               onPress={() => {
                 onEditing({ scheduleIdx, editingSchedule: "closing" });
                 setPickerVisible(true);
@@ -154,6 +170,7 @@ export const ScheduleCard = ({
                   padding: 2,
                   ...(closingError && { color: colors.danger }),
                   fontSize: 20,
+                  borderRadius: 4,
                 }}
               >
                 {closingHour[0]}
@@ -164,6 +181,7 @@ export const ScheduleCard = ({
                   padding: 2,
                   ...(closingError && { color: colors.danger }),
                   fontSize: 20,
+                  borderRadius: 4,
                 }}
               >
                 {closingHour[1]}
@@ -177,6 +195,7 @@ export const ScheduleCard = ({
                   padding: 2,
                   ...(closingError && { color: colors.danger }),
                   fontSize: 20,
+                  borderRadius: 4,
                 }}
               >
                 {closingMinute[0]}
@@ -187,6 +206,7 @@ export const ScheduleCard = ({
                   padding: 2,
                   ...(closingError && { color: colors.danger }),
                   fontSize: 20,
+                  borderRadius: 4,
                 }}
               >
                 {closingMinute[1]}

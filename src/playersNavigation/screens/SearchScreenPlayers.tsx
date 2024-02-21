@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
-  Platform,
   SafeAreaView,
+  StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
@@ -13,7 +13,13 @@ import { StackScreenProps } from "@react-navigation/stack";
 import { ComplexCard } from "../components/ComplexCard";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import { Complex } from "../../interfaces/complexes";
-import { PERMISSIONS, PermissionStatus, check } from "react-native-permissions";
+
+import Geolocation from "react-native-geolocation-service";
+import { checkLocationPermission, haversine } from "../../utils/utils";
+import { FadeModal } from "../../ownersNavigation/components/FadeModal";
+import { FadeModalState } from "../../interfaces/FadeModal";
+import { colors } from "../../theme/appTheme";
+import { DistanceModalContent } from "../components/DistanceModalContent";
 
 interface Props extends StackScreenProps<any, any> {}
 
@@ -23,6 +29,13 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
     useState<Complex[]>(complexes);
 
   const [filterValue, setFilterValue] = useState("");
+  const [kilometersDistanceState, setKilometersDistanceState] = useState(5);
+
+  const [distanceModalState, setDistanceModalState] = useState<FadeModalState>({
+    visible: false,
+    autoDismiss: false,
+    status: "",
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -32,49 +45,80 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
     return () => {
       clearTimeout(timer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterValue]);
 
   const filterComplexes = (value: string) => {
     const filteringComplexes = complexes.filter(({ name }) => {
       return name.toLowerCase().includes(value.toLowerCase());
     });
-    if (value.length === 0) return setFilteredComplexes(complexes);
+    if (value.length === 0) {
+      return setFilteredComplexes(complexes);
+    }
     setFilteredComplexes(filteringComplexes);
   };
 
   const getNearComplexes = () => {
-    checkLocationPermission();
+    checkLocationPermission(() =>
+      setDistanceModalState({ ...distanceModalState, visible: true })
+    );
   };
 
-  const checkLocationPermission = async () => {
-    let permissionStatus: PermissionStatus;
-    if (Platform.OS === "ios") {
-      permissionStatus = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
-    } else {
-      permissionStatus = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
-    }
-    console.log("permission", JSON.stringify(permissionStatus, null, 4));
+  const filterByLocation = (kmDistance: number) => {
+    Geolocation.getCurrentPosition(
+      ({ coords: { latitude, longitude } }) => {
+        console.log({ latitude, longitude });
+        const locationFilteredComplexes = complexes.filter((complex) => {
+          const haversineDistance = haversine(
+            latitude,
+            longitude,
+            complex.latitude,
+            complex.longitude
+          );
+          return haversineDistance <= kmDistance;
+        });
+
+        setFilteredComplexes(locationFilteredComplexes);
+      },
+      (error) => {
+        // See error code charts below.
+        console.log(error.code, error.message);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
   };
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1, padding: 16, gap: 16 }}>
-        <View
-          style={{
-            width: "100%",
-            flexDirection: "row",
-            borderWidth: 1,
-            borderRadius: 16,
-            borderColor: "#dddddd",
-            alignItems: "center",
-            paddingVertical: 12,
-            paddingHorizontal: 16,
-          }}
-        >
+    <SafeAreaView style={styles.safeAreaView}>
+      <View style={styles.screenContainer}>
+        <FadeModal
+          modalState={distanceModalState}
+          setModalState={setDistanceModalState}
+          modalContent={() =>
+            DistanceModalContent({
+              onInputChange: (distance: number) => {
+                setKilometersDistanceState(distance);
+              },
+              onCancel: () =>
+                setDistanceModalState({
+                  ...distanceModalState,
+                  visible: false,
+                }),
+              onConfirm: () => {
+                setDistanceModalState({
+                  ...distanceModalState,
+                  visible: false,
+                });
+                kilometersDistanceState &&
+                  filterByLocation(kilometersDistanceState);
+              },
+            })
+          }
+        />
+        <View style={styles.searchBarContainer}>
           <IonIcon name="search-outline" size={20} />
           <TextInput
-            style={{
-              flex: 1,
-            }}
+            style={styles.complexSearchInput}
             defaultValue=""
             onChangeText={(value) => setFilterValue(value)}
           />
@@ -92,9 +136,30 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
               route={route}
             />
           )}
-          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          // eslint-disable-next-line react/no-unstable-nested-components
+          ItemSeparatorComponent={() => (
+            <View style={styles.complexesSeparator} />
+          )}
         />
       </View>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  searchBarContainer: {
+    width: "100%",
+    flexDirection: "row",
+    borderWidth: 1,
+    borderRadius: 16,
+    borderColor: colors.inputBorder,
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  complexSearchInput: { flex: 1 },
+  screenContainer: { flex: 1, padding: 16, gap: 16 },
+  safeAreaView: { flex: 1 },
+
+  complexesSeparator: { height: 12 },
+});

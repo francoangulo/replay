@@ -10,18 +10,22 @@ import { DateTime } from "luxon";
 import replayAPI from "../../api/api";
 
 // Define a type for the slice state
-export interface OwnerTurnsState {
+export interface TurnsState {
   ownerTurns: Turn[];
+  playerTurns: Turn[];
   allTurns: Turn[];
   loadingOwnerTurns: boolean;
+  loadingPlayerTurns: boolean;
   loadingAllTurns: boolean;
 }
 
 // Define the initial state using that type
-const initialState: OwnerTurnsState = {
+const initialState: TurnsState = {
   ownerTurns: [],
+  playerTurns: [],
   allTurns: [],
   loadingOwnerTurns: true,
+  loadingPlayerTurns: true,
   loadingAllTurns: true,
 };
 
@@ -32,8 +36,15 @@ export const ownerTurnsSlice = createSlice({
     setOwnerTurns: (state, action: PayloadAction<Turn[]>) => {
       return {
         ...state,
-        ownerTurns: [...state.ownerTurns, ...action.payload],
+        ownerTurns: [...action.payload],
         loadingOwnerTurns: false,
+      };
+    },
+    setPlayerTurns: (state, action: PayloadAction<Turn[]>) => {
+      return {
+        ...state,
+        playerTurns: [...state.playerTurns, ...action.payload],
+        loadingPlayerTurns: false,
       };
     },
     setAllTurns: (state, action: PayloadAction<Turn[]>) => {
@@ -44,13 +55,25 @@ export const ownerTurnsSlice = createSlice({
       };
     },
     updateTurn: (state, action: PayloadAction<Turn>) => {
-      const updatedTurns = state.allTurns.map((turn) => {
-        if (turn._id === action.payload._id) return action.payload;
-        return turn;
-      });
+      console.log(
+        "franco current turns",
+        JSON.stringify(state.ownerTurns, null, 4)
+      );
+      console.log("franco new turn", JSON.stringify(action.payload, null, 4));
+
       return {
         ...state,
-        allTurns: [...updatedTurns],
+        allTurns: [
+          ...state.allTurns.map((turn) =>
+            turn._id === action.payload._id ? action.payload : turn
+          ),
+        ],
+        ownerTurns: [
+          ...state.ownerTurns.map((turn) =>
+            turn._id === action.payload._id ? action.payload : turn
+          ),
+        ],
+
         loadingAllTurns: false,
       };
     },
@@ -65,6 +88,7 @@ export const ownerTurnsSlice = createSlice({
 });
 
 const { setOwnerTurns } = ownerTurnsSlice.actions;
+const { setPlayerTurns } = ownerTurnsSlice.actions;
 const { setAllTurns } = ownerTurnsSlice.actions;
 const { resetAllTurns } = ownerTurnsSlice.actions;
 const { updateTurn } = ownerTurnsSlice.actions;
@@ -74,8 +98,18 @@ export const getOwnerTurns =
     try {
       const params = { complexOwnerId: ownerId };
       const resp = await replayAPI.get<TurnsResponse>("/turns", { params });
-      console.log("turns resp", JSON.stringify(resp.data.turns, null, 4));
       dispatch(setOwnerTurns(resp.data.turns));
+    } catch (error) {
+      console.log({ error });
+    }
+  };
+
+export const getPlayerTurns =
+  (playerId: string) => async (dispatch: AppDispatch) => {
+    try {
+      const params = { playerId };
+      const resp = await replayAPI.get<TurnsResponse>("/turns", { params });
+      dispatch(setPlayerTurns(resp.data.turns));
     } catch (error) {
       console.log({ error });
     }
@@ -98,6 +132,8 @@ interface TurnProps {
   fieldId: string;
   fieldNumber: number;
   complexOwnerId: string;
+  duration: 60 | 90 | 120;
+  playersAmount: number;
 }
 
 export const createTurn =
@@ -110,6 +146,8 @@ export const createTurn =
       fieldId,
       fieldNumber,
       startDate,
+      duration,
+      playersAmount,
     }: TurnProps,
     callback: (newTurn: Turn) => void = () => {}
   ) =>
@@ -123,8 +161,12 @@ export const createTurn =
         fieldId,
         fieldNumber,
         startDate,
+        duration,
+        playersAmount,
       });
       dispatch(setAllTurns([resp.data.newTurn]));
+      dispatch(setPlayerTurns([resp.data.newTurn]));
+      dispatch(setOwnerTurns([resp.data.newTurn]));
       callback(resp.data.newTurn);
     } catch (error) {
       console.log({ error });
@@ -133,7 +175,7 @@ export const createTurn =
 
 export const emptyTurns = () => async (dispatch: AppDispatch) => {
   try {
-    const resp = await replayAPI.delete<CreateTurnResponse>("/turns/all");
+    await replayAPI.delete<CreateTurnResponse>("/turns/all");
     dispatch(resetAllTurns());
   } catch (error) {
     console.log({ error });
@@ -147,7 +189,7 @@ export const confirmTurn =
   ) =>
   async (dispatch: AppDispatch) => {
     try {
-      const resp = await replayAPI.post<ConfirmTurnResponse>("/turns/confirm", {
+      const resp = await replayAPI.put<ConfirmTurnResponse>("/turns/confirm", {
         turnId,
       });
       dispatch(updateTurn(resp.data.confirmedTurn));

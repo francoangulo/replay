@@ -35,4 +35,5 @@ export interface Turn {
   complexOwnerId: string;
   Player: null;
   Owner: Owner;
+  playersAmount: number;
 }

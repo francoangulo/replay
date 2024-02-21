@@ -1,5 +1,8 @@
 import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
+import {
+  StackScreenProps,
+  createStackNavigator,
+} from "@react-navigation/stack";
 import { colors } from "../../theme/appTheme";
 import { Complex } from "../../interfaces/complexes";
 import { SearchScreenPlayers } from "../screens/SearchScreenPlayers";
@@ -14,7 +17,15 @@ export type SearchStackParamList = {
   ComplexScreen: {
     complex: Complex;
     availableTurns: AvailableTurn[];
-    getAvailableTurns: (selectedDate: DateTime) => AvailableTurn[];
+    getAvailableTurns: (
+      selectedDate: DateTime,
+      toState: boolean
+    ) => AvailableTurn[];
+    playersAmountsSelectors: number[];
+    getPlayersAmountsSelectors: (
+      turns: AvailableTurn[],
+      toState?: boolean
+    ) => number[];
   };
   BookedTurnScreen: { turn: Turn };
 };
@@ -24,7 +35,14 @@ const generalOptions = {
   header: () => <></>,
 };
 
-const screens = [
+interface ScreenProps extends StackScreenProps<any, any> {}
+interface Screen {
+  name: "Search" | "ComplexScreen" | "BookedTurnScreen";
+  component: ({ route, navigation }: ScreenProps) => React.JSX.Element;
+  options: { header: () => React.JSX.Element };
+}
+
+const screens: Screen[] = [
   {
     name: "Search",
     component: SearchScreenPlayers,

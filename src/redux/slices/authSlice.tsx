@@ -38,10 +38,6 @@ export const authSlice = createSlice({
 const { login } = authSlice.actions;
 
 export const loginOwner = (email: string) => async (dispatch: AppDispatch) => {
-  console.log(
-    "franco url",
-    JSON.stringify(replayAPI.defaults.baseURL, null, 4)
-  );
   try {
     const params = { email };
     const resp = await replayAPI.get<OwnerResponse>("/owners", { params });
@@ -62,10 +58,6 @@ interface LoginProps {
 export const loginPlayer =
   ({ email, password, callback, userId, token }: LoginProps) =>
   async (dispatch: AppDispatch) => {
-    console.log(
-      "franco url",
-      JSON.stringify(replayAPI.defaults.baseURL, null, 4)
-    );
     try {
       if (email && password) {
         const params = { email, password };
@@ -98,10 +90,8 @@ export const loginPlayer =
 export const loginUser =
   ({ email, password, callback, userId, token }: LoginProps) =>
   async (dispatch: AppDispatch) => {
-    console.log(
-      "franco url",
-      JSON.stringify(replayAPI.defaults.baseURL, null, 4)
-    );
+    console.log("HELLO THERE?");
+
     try {
       if (email && password) {
         const body = { email, password };
@@ -128,9 +118,9 @@ export const loginUser =
         const params = { userId, token };
         const res = await replayAPI.post<LoginUserResponse>(
           "/users/login",
-          //     "http://localhost:3000/users/login",
           params
         );
+
         if (res.data?.player) {
           dispatch(login({ ...res.data.player, userType: "player" }));
           callback && callback("player");
@@ -141,7 +131,7 @@ export const loginUser =
         }
       }
     } catch (error) {
-      console.log({ error, msg: "this is" });
+      console.log("error logging in user: ", error);
     }
   };
 
@@ -154,7 +144,8 @@ export const registerPlayer =
     password: string,
     callback: () => void
   ) =>
-  async (dispatch: AppDispatch) => {
+  async () => //   dispatch: AppDispatch
+  {
     try {
       const params = { name, lastName, phoneNumber, email, password };
       const resp = await replayAPI.post<{ status: string }>("/players", params);

@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { Complex } from "../interfaces/complexes";
 // Settings.defaultZone = "utc";
 
+interface TurnsObject {
+  [key: string]: AvailableTurn;
+}
 interface Props {
-  complex: Complex;
+  complex?: Complex;
   turns: Turn[];
 }
 
@@ -13,23 +16,39 @@ export interface AvailableTurn {
   turnTime: DateTime;
   available: boolean;
   fieldId: string;
+  fieldNumber: number;
+  playersAmount: number;
 }
 
 export const useAvailableTurns = ({ complex, turns }: Props) => {
+  const [availableTurns, setAvailableTurns] = useState<AvailableTurn[]>([]);
+  const [loadingAvailableTurns, setLoadingAvailableTurns] =
+    useState<boolean>(true);
+  const [playersAmountsSelectors, setPlayersAmountsSelectors] = useState<
+    number[]
+  >([]);
+
   useEffect(() => {
-    getAvailableTurns();
+    complex && getAvailableTurns(complex);
+    getPlayersAmountsSelectors(availableTurns, true);
     setLoadingAvailableTurns(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [availableTurns, setAvailableTurns] = useState<AvailableTurn[]>([]);
-  const [loadingAvailableTurns, setLoadingAvailableTurns] =
-    useState<boolean>(true);
+  useEffect(() => {
+    availableTurns &&
+      availableTurns.length &&
+      getPlayersAmountsSelectors(availableTurns, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableTurns]);
 
-  const getAvailableTurns = (selectedDate: DateTime = DateTime.now()) => {
-    console.log("franco selected date", JSON.stringify(selectedDate, null, 4));
+  const getAvailableTurns = (
+    complex: Complex,
+    selectedDate: DateTime = DateTime.now(),
+    toState: boolean = true
+  ) => {
     const turnsAccumulator: AvailableTurn[] = [];
-    setAvailableTurns([]);
+    toState && setAvailableTurns([]);
     complex.FootballFields.forEach((footballField) => {
       complex.ComplexSchedules.forEach((complexSchedule) => {
         // Obtener el rango de horarios de apertura y cierre
@@ -55,15 +74,6 @@ export const useAvailableTurns = ({ complex, turns }: Props) => {
           year: selectedDate.get("year"),
         });
 
-        console.log(
-          "franco opening date",
-          JSON.stringify(openingDate, null, 4)
-        );
-        console.log(
-          "franco closing date",
-          JSON.stringify(closingDate, null, 4)
-        );
-
         const hoursDiff = closingDate.diff(openingDate, "hours").toObject();
 
         const halfTurns = hoursDiff.hours ? hoursDiff.hours * 2 + 1 : 0;
@@ -86,15 +96,14 @@ export const useAvailableTurns = ({ complex, turns }: Props) => {
                   newHalfTurn.toMillis() === turnStart.toMillis())
               );
             }) || newHalfTurn.valueOf() < DateTime.local().valueOf();
-          console.log(
-            "franco new half turn",
-            JSON.stringify(newHalfTurn, null, 4)
-          );
+
           lastTurn = newHalfTurn;
-          const pushingTurn = {
+          const pushingTurn: AvailableTurn = {
             turnTime: newHalfTurn,
             available: !notAvailable,
             fieldId: footballField._id,
+            fieldNumber: footballField.fieldNumber,
+            playersAmount: footballField.playersAmount,
           };
           turnsAccumulator.push(pushingTurn);
           return pushingTurn;
@@ -103,21 +112,50 @@ export const useAvailableTurns = ({ complex, turns }: Props) => {
         turnsAccumulator.concat([...createdTurns]);
       });
     });
-    setAvailableTurns([...turnsAccumulator]);
-    console.log(
-      "franco turns accumulator",
-      JSON.stringify(turnsAccumulator, null, 4)
-    );
-    return turnsAccumulator;
+    const turnsObject: TurnsObject = {};
+    turnsAccumulator.forEach((turn) => {
+      if (!turn.available) return;
+      const turnTime = turn.turnTime.toFormat("HH:mm");
+      const turnKey = `${turnTime}-${turn.playersAmount}`;
+
+      if (!turnsObject[turnKey]) {
+        turnsObject[turnKey] = turn;
+      } else if (!turnsObject[turnKey].available) {
+        turnsObject[turnKey] = turn;
+      }
+    });
+
+    const finalTurns = Object.keys(turnsObject).map((key) => turnsObject[key]);
+    //     const finalTurns = turnsAccumulator;
+
+    toState && setAvailableTurns([...finalTurns]);
+
+    return finalTurns;
   };
-  const formattedTurns = availableTurns.map(({ turnTime }) =>
-    turnTime.toFormat("HH:mm")
-  );
+
+  const getPlayersAmountsSelectors = (
+    turns: AvailableTurn[],
+    toState: boolean = true
+  ) => {
+    const playersAmountsVariables: number[] = turns.reduce(
+      (acc: number[], turn) => {
+        if (!acc.includes(turn.playersAmount)) {
+          acc.push(turn.playersAmount);
+        }
+        return acc;
+      },
+      []
+    );
+    toState && setPlayersAmountsSelectors(playersAmountsVariables);
+
+    return playersAmountsVariables;
+  };
 
   return {
     loadingAvailableTurns,
     availableTurns,
-    formattedTurns,
+    playersAmountsSelectors,
+    getPlayersAmountsSelectors,
     getAvailableTurns,
   };
 };

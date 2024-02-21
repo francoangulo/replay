@@ -4,17 +4,25 @@ import { colors } from "../../theme/appTheme";
 import CalendarScreen from "../screens/CalendarScreen";
 import CalendarComplexesScreen from "../screens/CalendarComplexesScreen";
 import { Complex } from "../../interfaces/complexes";
+import { TurnScreen } from "../../sharedNavigation/screens/TurnScreen";
+import { Turn } from "../../interfaces/Turns";
 
 export type CalendarStackParamList = {
   CalendarComplexesScreen: undefined;
   CalendarScreen: { complex: Complex };
+  TurnScreen: { turn: Turn };
 };
 
 const Stack = createStackNavigator<CalendarStackParamList>();
 
 const navOptions = { header: () => <></> };
 
-const screens = [
+interface Screen {
+  name: keyof CalendarStackParamList;
+  component: ({}: any) => JSX.Element;
+}
+
+const screens: Screen[] = [
   {
     name: "CalendarComplexesScreen",
     component: CalendarComplexesScreen,
@@ -23,6 +31,7 @@ const screens = [
     name: "CalendarScreen",
     component: CalendarScreen,
   },
+  { name: "TurnScreen", component: TurnScreen },
 ];
 
 export const CalendarNavigator = () => {

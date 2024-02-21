@@ -1,13 +1,23 @@
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
+import { Theme } from "react-native-calendars/src/types";
 
 export const colors = {
   appBg: "#fafafa",
   appBgTransparent: "#fafafadd",
   appFadeBg: "#00000099",
   cardBg: "#ffffff",
+  inputBg: "#e9e9e9",
   primary: "#4BB543",
+  primaryOne: "#B3EEAD",
+  primaryTwo: "#CCF8C7",
+  primaryThree: "#EEF8ED",
   danger: "#FA4557",
+  dangerMedium: "#F7D1D5",
+  dangerLight: "#FAEEEF",
+  warning: "#fab028",
+  warningLight: "#f7efdc",
   gray: "#808080",
+  inputBorder: "#DDDDDD",
 };
 
 export const paddings = {
@@ -35,7 +45,7 @@ export const cardStyle: StyleProp<ViewStyle> = {
 
 export const titleStyle: StyleProp<TextStyle> = {
   fontWeight: "bold",
-  fontSize: 20,
+  fontSize: 22,
 };
 
 export const subTitleStyle: StyleProp<TextStyle> = {
@@ -51,3 +61,44 @@ export const cardTitleStyle: StyleProp<TextStyle> = {
   textTransform: "capitalize",
   fontWeight: "700",
 };
+
+export const expandableCalendarTheme: Theme = {
+  monthTextColor: "#000000dd",
+  arrowColor: colors.primary,
+  textSectionTitleColor: "#000000dd",
+  todayBackgroundColor: `${colors.primary}18`,
+  todayTextColor: "#00000044",
+  dayTextColor: "#00000044",
+  selectedDayBackgroundColor: colors.primary,
+  selectedDayTextColor: "white",
+  stylesheet: {
+    expandable: {
+      main: {
+        knob: {
+          width: 40,
+          height: 4,
+          borderRadius: 3,
+          backgroundColor: "green",
+        },
+        containerShadow: {
+          elevation: 0,
+          shadowOpacity: 0,
+          height: 0,
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+        },
+      },
+    },
+  },
+};
+
+export const calendarProviderTheme: Theme = {
+  backgroundColor: "#040404",
+  selectedDayBackgroundColor: "#000",
+  arrowWidth: 90,
+  todayButtonFontSize: 40,
+};
+
+export const calendarProviderStyles: StyleProp<any> = { flex: 1 };

@@ -12,7 +12,6 @@ import { ProfileStackParamList } from "../navigators/ProfileNavigatorOwners";
 import { colors, cardStyle } from "../../theme/appTheme";
 import { useAddFields } from "../../hooks/useAddFields";
 import { TimePickerModal } from "../components/TimePickerModal";
-import IonIcon from "react-native-vector-icons/Ionicons";
 import { ScheduleCard } from "../components/ScheduleCard";
 import { useAppDispatch } from "../../hooks/redux";
 import {
@@ -21,6 +20,7 @@ import {
 } from "../../redux/slices/complexesSlice";
 import ADIcon from "react-native-vector-icons/AntDesign";
 import { FadeModal } from "../components/FadeModal";
+import { FieldsAmountSelector } from "../components/FieldsAmountSelector";
 
 type Props = StackScreenProps<ProfileStackParamList, "AddFieldsScreen">;
 
@@ -45,7 +45,12 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
 
   const dispatch = useAppDispatch();
 
-  const [fieldsAmount, setFieldsAmount] = useState(1);
+  const [fieldsState, setFieldsState] = useState({
+    five: { playersAmount: 5, fieldsAmount: 0 },
+    seven: { playersAmount: 7, fieldsAmount: 0 },
+    nine: { playersAmount: 9, fieldsAmount: 0 },
+    eleven: { playersAmount: 11, fieldsAmount: 0 },
+  });
   const [modalState, setModalState] = useState({
     visible: false,
     status: "",
@@ -56,6 +61,7 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
     if (modalState.visible === false && modalState.status === "success") {
       navigation.pop();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalState]);
 
   const complexId = route?.params?.complexId;
@@ -67,7 +73,9 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
       const errors = schedulesHaveErrors();
       if (errors) return;
       setModalState({ visible: true, status: "loading", autoDismiss: false });
-      dispatch(postFootballFields({ body: { fieldsAmount, complexId } }));
+      dispatch(
+        postFootballFields({ body: { fieldsAmounts: fieldsState, complexId } })
+      );
       dispatch(
         postComplexSchedules({
           body: {
@@ -123,82 +131,38 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
           >
             <View style={{ flex: 1, alignItems: "center" }}>
               <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-              >
-                <Text style={{ fontSize: 16 }}>Fútbol</Text>
-                <IonIcon
-                  name="football-outline"
-                  size={24}
-                  color={colors.primary}
-                />
-              </View>
-              <View>
-                <Text
-                  style={{
-                    fontSize: 50,
-                  }}
-                >
-                  {fieldsAmount}
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: colors.appBgTransparent,
-                    padding: 8,
-                    borderRadius: 8,
-                  }}
-                  onPress={() => setFieldsAmount(fieldsAmount + 1)}
-                >
-                  <IonIcon name="add-outline" size={24} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: colors.appBgTransparent,
-                    padding: 8,
-                    borderRadius: 8,
-                  }}
-                  onPress={() => setFieldsAmount(fieldsAmount - 1)}
-                >
-                  <IonIcon name="remove-outline" size={24} />
-                </TouchableOpacity>
-              </View>
-            </View>
-            {/* <View style={{ flex: 1, alignItems: "center" }}>
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-              >
-                <MCIcon name="table-tennis" size={24} color={colors.primary} />
-                <Text style={{ fontSize: 16 }}>Padel</Text>
-              </View>
-              <Text
                 style={{
-                  fontSize: 50,
+                  flexDirection: "row",
+                  justifyContent: "space-evenly",
+                  width: "100%",
                 }}
               >
-                1
-              </Text>
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: colors.appBgTransparent,
-                    padding: 8,
-                    borderRadius: 8,
-                  }}
-                >
-                  <IonIcon name="add-outline" size={24} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: colors.appBgTransparent,
-                    padding: 8,
-                    borderRadius: 8,
-                  }}
-                >
-                  <IonIcon name="remove-outline" size={24} />
-                </TouchableOpacity>
+                <FieldsAmountSelector
+                  playersAmount={5}
+                  fieldsState={fieldsState}
+                  playersAmountString={"five"}
+                  setFieldsState={setFieldsState}
+                />
+                <FieldsAmountSelector
+                  playersAmount={7}
+                  fieldsState={fieldsState}
+                  playersAmountString={"seven"}
+                  setFieldsState={setFieldsState}
+                />
+                <FieldsAmountSelector
+                  playersAmount={9}
+                  fieldsState={fieldsState}
+                  playersAmountString={"nine"}
+                  setFieldsState={setFieldsState}
+                />
+                <FieldsAmountSelector
+                  playersAmount={11}
+                  fieldsState={fieldsState}
+                  playersAmountString={"eleven"}
+                  setFieldsState={setFieldsState}
+                />
               </View>
-            </View> */}
+            </View>
           </View>
         </View>
         <View>
@@ -228,7 +192,8 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
                 justifyContent: "center",
                 padding: 8,
                 borderWidth: 1,
-                borderColor: colors.primary,
+                //     borderColor: colors.primary,
+                borderColor: "#00000044",
                 width: "100%",
                 borderRadius: 5,
                 borderStyle: "dashed",
@@ -239,27 +204,6 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
             </TouchableOpacity>
           </View>
         </View>
-        {/* <View style={styles.fieldsWrapper}>
-          {fieldsState.map(({ fieldSchedules }, fieldIdx) => {
-            return (
-              <FieldCard
-                key={`field-card-${fieldIdx}`}
-                addSchedule={addSchedule}
-                fieldIdx={fieldIdx}
-                fieldSchedules={fieldSchedules}
-                onEditing={onEditing}
-                onDelete={deleteField}
-                setPickerVisible={setModalVisible}
-                fieldsLength={fieldsState.length}
-                onDeleteSchedule={deleteSchedule}
-                fieldError={fieldError}
-              />
-            );
-          })}
-          <TouchableOpacity style={styles.addFieldButton} onPress={addField}>
-            <ADIcon name="plus" size={24} color={colors.primary} />
-          </TouchableOpacity>
-        </View> */}
       </ScrollView>
       <View style={styles.footerButtonsWrapper}>
         <TouchableOpacity
@@ -296,7 +240,7 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
       />
       <FadeModal
         modalState={modalState}
-        setModalVisible={setModalState}
+        setModalState={setModalState}
         modalContent={() => {
           return (
             <View>

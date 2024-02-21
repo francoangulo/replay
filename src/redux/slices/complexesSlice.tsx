@@ -118,7 +118,7 @@ export const deleteComplex =
   (complexId: string, callback: () => void = () => {}) =>
   async (dispatch: AppDispatch) => {
     try {
-      const resp = await replayAPI.delete<DeleteComplexResponse>("/complexes", {
+      await replayAPI.delete<DeleteComplexResponse>("/complexes", {
         data: { complexId },
       });
 
@@ -132,7 +132,24 @@ export const deleteComplex =
 
 interface PostFootballFieldsProps {
   body: {
-    fieldsAmount: number;
+    fieldsAmounts: {
+      five: {
+        playersAmount: number;
+        fieldsAmount: number;
+      };
+      seven: {
+        playersAmount: number;
+        fieldsAmount: number;
+      };
+      nine: {
+        playersAmount: number;
+        fieldsAmount: number;
+      };
+      eleven: {
+        playersAmount: number;
+        fieldsAmount: number;
+      };
+    };
     complexId: string;
   };
   callback?: () => void;

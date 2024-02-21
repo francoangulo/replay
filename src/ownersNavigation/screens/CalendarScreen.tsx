@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, SafeAreaView } from "react-native";
+import { View, Text, SafeAreaView, StyleSheet } from "react-native";
 import { Agenda, AgendaSchedule } from "react-native-calendars";
 import { useAppSelector } from "../../hooks/redux";
 import { selectTurns } from "../../redux/slices/turnsSlice";
@@ -7,9 +7,9 @@ import { Turn } from "../../interfaces/Turns";
 import { DateTime } from "luxon";
 import { colors } from "../../theme/appTheme";
 import { getRandomPastelColor } from "../../utils/utils";
-import { selectComplexes } from "../../redux/slices/complexesSlice";
 import { StackScreenProps } from "@react-navigation/stack";
 import { CalendarStackParamList } from "../navigators/CalendarNavigator";
+import { AgendaTurn } from "../components/AgendaTurn";
 
 type Props = StackScreenProps<CalendarStackParamList, "CalendarScreen">;
 
@@ -30,6 +30,7 @@ const CalendarScreen = ({ navigation, route }: Props) => {
       (turn) => turn.complexId === complex._id
     );
     setComplexTurns(filteredTurns);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadItems = () => {
@@ -61,32 +62,11 @@ const CalendarScreen = ({ navigation, route }: Props) => {
   };
   useEffect(() => {
     loadItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderItem = ({ startDate, endDate, fieldNumber }: Turn) => {
-    return (
-      <View
-        style={{
-          ...styles.item,
-          backgroundColor: getRandomPastelColor((fieldNumber + 1) / 10),
-        }}
-      >
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <Text>{DateTime.fromISO(startDate).toFormat("HH:mm")}</Text>
-          <Text>{DateTime.fromISO(endDate).toFormat("HH:mm")}</Text>
-        </View>
-        <Text style={{ opacity: 0.4 }}>Cancha {fieldNumber}</Text>
-      </View>
-    );
-  };
-
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: colors.appBg,
-      }}
-    >
+    <SafeAreaView style={styles.screenContainer}>
       <Agenda
         theme={{
           agendaTodayColor: colors.primary,
@@ -102,7 +82,9 @@ const CalendarScreen = ({ navigation, route }: Props) => {
         futureScrollRange={1}
         items={items}
         loadItemsForMonth={loadItems}
-        renderItem={renderItem}
+        renderItem={(turn) => (
+          <AgendaTurn turn={turn} navigation={navigation} />
+        )}
         renderEmptyData={() => {
           return (
             <View
@@ -141,10 +123,11 @@ const CalendarScreen = ({ navigation, route }: Props) => {
           }}
         >
           {!calendarOpened ? (
-            complex.FootballFields.map(({ fieldNumber }) => {
+            complex.FootballFields.map(({ fieldNumber }, idx) => {
               return (
                 <View
                   style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
+                  key={`field-number-${fieldNumber}-${idx}`}
                 >
                   <View
                     style={{
@@ -181,18 +164,11 @@ const CalendarScreen = ({ navigation, route }: Props) => {
   );
 };
 
+export default CalendarScreen;
+
 const styles = StyleSheet.create({
-  item: {
+  screenContainer: {
     flex: 1,
-    flexDirection: "row",
-    borderRadius: 5,
-    padding: 10,
-    paddingHorizontal: 16,
-    marginRight: 10,
-    marginTop: 17,
-    justifyContent: "space-between",
-    alignItems: "center",
+    backgroundColor: colors.appBg,
   },
 });
-
-export default CalendarScreen;

@@ -1,80 +1,119 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
-import { Modal, Text, TouchableOpacity, View } from "react-native";
-import { cardStyle, colors, paddings, titleStyle } from "../../theme/appTheme";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  calendarProviderStyles,
+  calendarProviderTheme,
+  colors,
+  expandableCalendarTheme,
+} from "../../theme/appTheme";
 import { DateTime } from "luxon";
-import { createTurn, emptyTurns } from "../../redux/slices/turnsSlice";
+import { createTurn } from "../../redux/slices/turnsSlice";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { selectAuth } from "../../redux/slices/authSlice";
 
 import { ScrollView } from "react-native-gesture-handler";
 import IonIcon from "react-native-vector-icons/Ionicons";
-import { FieldComponent } from "../components/FieldComponent";
 import { SearchStackParamList } from "../navigators/SearchNavigatorPlayers";
-import {
-  CalendarProvider,
-  ExpandableCalendar,
-  WeekCalendar,
-} from "react-native-calendars";
+import { CalendarProvider, ExpandableCalendar } from "react-native-calendars";
 import { Turn } from "../../interfaces/Turns";
+import { Header } from "../components/Header";
+import { TurnTimeSelector } from "../components/TurnTimeSelector";
+import { ComplexBanner } from "../components/ComplexBanner";
+import { ConfirmTurnModal } from "../components/ConfirmTurnModal";
+import { TurnDurationSelector } from "../components/TurnDurationSelector";
+import { PlayersAmountSelector } from "../components/PlayersAmountSelector";
+import { AvailableTurn } from "../../hooks/useAvailableTurns";
+import { CommonActions } from "@react-navigation/native";
 
 interface Props
   extends StackScreenProps<SearchStackParamList, "ComplexScreen"> {}
 
+export interface SelectedTurnState {
+  turnTime?: DateTime;
+  duration?: 60 | 90 | 120;
+}
+
 export const ComplexScreen = ({ route, navigation }: Props) => {
-  const { availableTurns = [], getAvailableTurns = () => {} } = route.params;
-  const [selectedTurn, setSelectedTurn] = useState<DateTime>();
+  let {
+    availableTurns = [],
+    getAvailableTurns,
+    playersAmountsSelectors,
+    getPlayersAmountsSelectors,
+  } = route.params;
+  const complex = route.params?.complex ?? false;
+
+  const [filteredTurns, setFilteredTurns] = useState(availableTurns);
+  const [selectedPlayersAmount, setSelectedPlayersAmount] = useState<number>(
+    playersAmountsSelectors[0] || 5
+  );
+  const [loading, setLoading] = useState(true);
+  const [selectedTurn, setSelectedTurn] = useState<SelectedTurnState>({});
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDateString, setSelectedDateString] = useState(
     DateTime.local().toFormat("yyyy-MM-dd")
   );
   const [selectedField, setSelectedField] = useState({ id: "", number: 1 });
-  const { _id: playerId } = useAppSelector(selectAuth);
+  const user = useAppSelector(selectAuth);
+  const { _id: playerId } = user;
   const dispatch = useAppDispatch();
-  const { top } = useSafeAreaInsets();
-  const complex = route.params?.complex ?? false;
 
   useEffect(() => {
-    navigation.setOptions({
-      header: () => (
-        <View
-          style={{
-            padding: 24,
-            paddingTop: top,
-            backgroundColor: colors.cardBg,
-          }}
-        >
-          <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-            {complex.name}
-          </Text>
-        </View>
-      ),
-    });
-  }, []);
-
-  useEffect(() => {
-    console.log(
-      "franco new turns",
-      JSON.stringify(
-        getAvailableTurns(
-          DateTime.fromFormat(selectedDateString, "yyyy-MM-dd")
-        ),
-        null,
-        4
-      )
+    const newFilteredTurns = availableTurns.filter(
+      ({ playersAmount }) => playersAmount === selectedPlayersAmount
     );
-    navigation.setParams({
-      availableTurns: getAvailableTurns(
-        DateTime.fromFormat(selectedDateString, "yyyy-MM-dd")
-      ),
-    });
+    if (newFilteredTurns.length) {
+      setFilteredTurns(sortByDate(newFilteredTurns));
+      setLoading(false);
+    } else {
+      setFilteredTurns(
+        sortByDate(
+          availableTurns.filter(
+            ({ playersAmount }) =>
+              playersAmount === playersAmountsSelectors[0] || 5
+          )
+        )
+      );
+      setSelectedPlayersAmount(playersAmountsSelectors[0] || 5);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableTurns]);
+
+  useEffect(() => {
+    const newTurns = getAvailableTurns(
+      DateTime.fromFormat(selectedDateString, "yyyy-MM-dd"),
+      false
+    );
+    navigation.dispatch(
+      CommonActions.setParams({
+        availableTurns: newTurns,
+        playersAmountsSelectors: getPlayersAmountsSelectors(newTurns, false),
+      })
+    );
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDateString]);
 
-  const { FootballFields } = complex;
+  useEffect(() => {
+    const newFilteredTurns = sortByDate(
+      availableTurns.filter(
+        ({ playersAmount }) => playersAmount === selectedPlayersAmount
+      )
+    );
+
+    setFilteredTurns(newFilteredTurns);
+    setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPlayersAmount]);
 
   const submitTurn = () => {
-    if (!selectedTurn) {
+    if (!selectedTurn?.turnTime || !selectedTurn.duration) {
       return;
     }
     dispatch(
@@ -83,12 +122,14 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
           playerId,
           complexId: complex._id,
           complexOwnerId: complex.ownerId,
-          startDate: selectedTurn,
-          endDate: selectedTurn.plus({
-            hours: 1,
+          startDate: selectedTurn.turnTime,
+          endDate: selectedTurn.turnTime.plus({
+            minutes: selectedTurn.duration,
           }),
           fieldId: selectedField.id,
           fieldNumber: selectedField.number,
+          duration: selectedTurn.duration,
+          playersAmount: selectedPlayersAmount,
         },
         (turn: Turn) => {
           navigation.replace("BookedTurnScreen", { turn });
@@ -100,178 +141,146 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}
+    <View style={styles.screenContainer}>
+      <ConfirmTurnModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        selectedTurn={selectedTurn}
+        submitTurn={submitTurn}
+      />
+      <Header complex={complex} navigation={navigation} route={route} />
+      <ScrollView
+        style={styles.scrollViewStyle}
+        contentContainerStyle={styles.scrollViewContentStyle}
       >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#00000044",
+        <CalendarProvider
+          date={selectedDateString}
+          theme={calendarProviderTheme}
+          onDateChanged={(date) => {
+            setLoading(true);
+            setSelectedDateString(date);
           }}
+          style={calendarProviderStyles}
         >
-          <View
-            style={{
-              backgroundColor: colors.cardBg,
-              padding: 16,
-              borderRadius: paddings.globalRadius,
-              gap: 16,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
-              <Text style={{ ...titleStyle }}>Reservar turno</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <IonIcon name="close-outline" size={24} color={"red"} />
-              </TouchableOpacity>
-            </View>
-            <Text style={{}}>
-              ¿Quieres reservar el turno de las{" "}
-              {selectedTurn?.toFormat("HH:mm")}?
-            </Text>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={submitTurn}>
-                <Text>Confirmar</Text>
-              </TouchableOpacity>
-            </View>
+          {/* <View> */}
+          <ComplexBanner complex={complex} />
+          <View style={styles.dateSelectorTitleContainer}>
+            <IonIcon name="calendar-outline" size={18} />
+            <Text style={styles.dateSelectorTitle}>Selecciona la fecha</Text>
           </View>
-        </View>
-      </Modal>
-      <CalendarProvider
-        date={selectedDateString}
-        theme={{
-          backgroundColor: "#040404",
-          selectedDayBackgroundColor: "#000",
-          arrowWidth: 90,
-          monthTextColor: "green",
-          todayButtonFontSize: 40,
-          agendaKnobColor: "red",
-        }}
-        onDateChanged={(date) => setSelectedDateString(date)}
-        style={{ flex: 1 }}
-      >
-        <ExpandableCalendar
-          disablePan
-          hideKnob
-          openThreshold={0}
-          closeThreshold={0}
-          allowShadow
-          style={{ paddingBottom: 16 }}
-          theme={{
-            backgroundColor: "red",
-            monthTextColor: "green",
-            todayBackgroundColor: "yellow",
-            todayButtonTextColor: "green",
-            selectedDayBackgroundColor: "green",
-            selectedDayTextColor: "white",
-            textSectionTitleColor: "red",
-            textDayFontWeight: "bold",
-            dayTextColor: "black",
-            agendaDayTextColor: "green",
-            stylesheet: {
-              expandable: {
-                main: {
-                  knob: {
-                    width: 40,
-                    height: 4,
-                    borderRadius: 3,
-                    backgroundColor: "green",
-                  },
-                  containerShadow: {
-                    elevation: 0,
-                    shadowOpacity: 0,
-                    height: 0,
-                    shadowOffset: {
-                      width: 0,
-                      height: 2,
-                    },
-                  },
-                },
-              },
-            },
-          }}
-        />
-        {/* <WeekCalendar
-            theme={{
-              agendaTodayColor: "red",
-            }}
-            renderHeader={() => <Text>Hello</Text>}
+          <ExpandableCalendar
+            disablePan
+            hideKnob
+            openThreshold={0}
+            closeThreshold={0}
             allowShadow
-          /> */}
-        <ScrollView
-          style={{
-            flex: 1,
-            marginTop: 120,
-          }}
-          contentContainerStyle={{
-            flex: 1,
-            paddingBottom: 420,
-          }}
-        >
-          <Text style={titleStyle}>{complex.name}</Text>
-          <View style={{ gap: 16, flex: 1 }}>
-            {FootballFields
-              ? FootballFields.map((footballField) => {
-                  const fieldTurns = availableTurns.filter((turn) => {
-                    return turn.fieldId === footballField._id;
-                  });
-                  return (
-                    <FieldComponent
-                      availableTurns={fieldTurns}
-                      footballField={footballField}
-                      onTurnPress={(turnTime) => {
-                        setSelectedTurn(turnTime);
-                        setModalVisible(true);
-                        setSelectedField({
-                          id: footballField._id,
-                          number: footballField.fieldNumber,
-                        });
-                      }}
-                      complex={complex}
-                    />
-                  );
-                })
-              : null}
-          </View>
-          <TouchableOpacity
-            style={{
-              position: "absolute",
-              backgroundColor: "#FF5858",
-              bottom: 120,
-              right: 10,
-              paddingHorizontal: 16,
-              paddingVertical: 8,
-              borderRadius: 4,
-            }}
-            onPress={() => dispatch(emptyTurns())}
-          >
-            <Text style={{ color: "white", fontWeight: "bold" }}>
-              Empty Turns
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </CalendarProvider>
+            style={styles.calendar}
+            theme={expandableCalendarTheme}
+          />
+          {loading ? (
+            <ActivityIndicator size={50} />
+          ) : (
+            <>
+              <PlayersAmountSelector
+                playersAmountsSelectors={playersAmountsSelectors}
+                selectedPlayersAmount={selectedPlayersAmount}
+                setSelectedPlayersAmount={setSelectedPlayersAmount}
+              />
+              <TurnTimeSelector
+                filteredTurns={filteredTurns}
+                setSelectedField={setSelectedField}
+                setSelectedTurn={setSelectedTurn}
+                selectedTurn={selectedTurn}
+              />
+              <TurnDurationSelector
+                selectedTurn={selectedTurn}
+                filteredTurns={filteredTurns}
+                setSelectedTurn={setSelectedTurn}
+              />
+            </>
+          )}
+          {/* </View> */}
+
+          {filteredTurns.length ? (
+            <View style={styles.footerButtonsContainer}>
+              {/* <TouchableOpacity
+                style={styles.emptyTurnsButton}
+                onPress={() => dispatch(emptyTurns())}
+              >
+                <Text style={styles.emptyTurnsButtonText}>Vaciar turnos</Text>
+              </TouchableOpacity> */}
+              <TouchableOpacity
+                style={{
+                  ...styles.bookTurnButton,
+                  ...(selectedTurn?.turnTime && selectedTurn?.duration
+                    ? {}
+                    : { opacity: 0.35 }),
+                }}
+                {...((!selectedTurn?.turnTime || !selectedTurn?.duration) && {
+                  activeOpacity: 0.35,
+                })}
+                onPress={() => submitTurn()}
+              >
+                <Text style={styles.bookTurnButtonText}>Reservar turno</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+        </CalendarProvider>
+      </ScrollView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screenContainer: { flex: 1 },
+  calendar: { paddingBottom: 16, zIndex: 1, height: 140 },
+  dateSelectorTitleContainer: {
+    width: "100%",
+    paddingTop: 8,
+    zIndex: 33,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.cardBg,
+    gap: 8,
+  },
+  dateSelectorTitle: { fontWeight: "bold" },
+  scrollViewStyle: {
+    flex: 1,
+  },
+  scrollViewContentStyle: {
+    //     flex: 1,
+    justifyContent: "space-between",
+    //     paddingBottom: 232,
+  },
+  footerButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 16,
+  },
+
+  emptyTurnsButton: {
+    backgroundColor: "#FF5858",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 4,
+  },
+  emptyTurnsButtonText: { color: "white", fontWeight: "bold" },
+
+  bookTurnButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 4,
+    width: "100%",
+    alignItems: "center",
+  },
+  bookTurnButtonText: { color: "white", fontWeight: "bold" },
+});
+
+const sortByDate = (turnsToSort: AvailableTurn[]) =>
+  turnsToSort.sort((turnA, turnB) => {
+    if (turnA.turnTime < turnB.turnTime) return -1;
+    if (turnB.turnTime < turnA.turnTime) return 1;
+    return 0;
+  });

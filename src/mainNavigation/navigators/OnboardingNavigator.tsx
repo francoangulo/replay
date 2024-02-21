@@ -17,7 +17,6 @@ export type OnboardingTabsParamsList = {
   OwnersNavigator: { turnIdParam?: string };
   PlayersNavigator: undefined;
 };
-
 const screens = [
   {
     name: "LoginScreen",
@@ -36,7 +35,6 @@ const Stack = createStackNavigator<OnboardingTabsParamsList>();
 export const OnboardingNavigator = ({}) => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
-
   const checkAlreadyLoggedIn = async () => {
     const token = await getToken();
     const user = await getUserId();
@@ -54,12 +52,16 @@ export const OnboardingNavigator = ({}) => {
             navigation.dispatch(
               StackActions.replace(route, { fromSplash: true })
             );
-            SplashScreen.hide();
+            setTimeout(() => {
+              SplashScreen.hide();
+            }, 3000);
           },
         })
       );
     } else {
-      SplashScreen.hide();
+      setTimeout(() => {
+        SplashScreen.hide();
+      }, 3000);
     }
   };
 

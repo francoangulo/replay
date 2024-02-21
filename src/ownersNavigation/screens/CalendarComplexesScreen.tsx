@@ -11,7 +11,6 @@ interface Props
 
 const CalendarComplexesScreen = ({ navigation }: Props) => {
   const { ownerComplexes } = useAppSelector(selectOwnerComplexes);
-  console.log("franco complexes", JSON.stringify(ownerComplexes, null, 4));
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

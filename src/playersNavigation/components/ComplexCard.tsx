@@ -20,15 +20,21 @@ interface Props extends StackScreenProps<any, any> {
 
 export const ComplexCard = ({ navigation, complex }: Props) => {
   const { allTurns } = useAppSelector(selectTurns);
-  const { availableTurns, loadingAvailableTurns, getAvailableTurns } =
-    useAvailableTurns({
-      complex,
-      turns: allTurns,
-    });
+  const {
+    availableTurns,
+    loadingAvailableTurns,
+    getAvailableTurns,
+    playersAmountsSelectors,
+    getPlayersAmountsSelectors,
+  } = useAvailableTurns({
+    complex,
+    turns: allTurns,
+  });
   const { name, address } = complex;
 
   useEffect(() => {
     getAvailableTurns();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allTurns]);
 
   if (loadingAvailableTurns) {
@@ -49,6 +55,8 @@ export const ComplexCard = ({ navigation, complex }: Props) => {
           complex,
           availableTurns,
           getAvailableTurns,
+          playersAmountsSelectors,
+          getPlayersAmountsSelectors,
         });
       }}
     >
@@ -88,7 +96,7 @@ export const ComplexCard = ({ navigation, complex }: Props) => {
                   color: "gray",
                 }}
               >
-                {turnsAmount} turnos disponibles
+                {turnsAmount} turnos disponibles hoy
               </Text>
             </View>
           </View>

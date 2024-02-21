@@ -1,19 +1,41 @@
-import React from "react";
-import { Button, FlatList, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import {
+  Button,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAppSelector } from "../../hooks/redux";
-import { selectTurns } from "../../redux/slices/turnsSlice";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { getOwnerTurns, selectTurns } from "../../redux/slices/turnsSlice";
 import { DateTime } from "luxon";
-import { cardStyle } from "../../theme/appTheme";
 import { TextComponent } from "../../components/TextComponent";
 import { StackScreenProps } from "@react-navigation/stack";
 import { HomeStackParamList } from "../navigators/HomeNavigator";
+import { selectAuth } from "../../redux/slices/authSlice";
+import { InProgressTurn } from "../components/InProgressTurn";
+import { PendingConfirmationTurn } from "../components/PendingConfirmationTurn";
+import { IncomingTurn } from "../components/IncomingTurn";
 
 type Props = StackScreenProps<HomeStackParamList, "OwnersHomeScreen">;
 
 export const OwnersHomeScreen = ({ route, navigation }: Props) => {
   const turnIdParam = route.params?.turnIdParam ?? "";
   const { ownerTurns } = useAppSelector(selectTurns);
+  const { _id } = useAppSelector(selectAuth);
+  const dispatch = useAppDispatch();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await dispatch(getOwnerTurns(_id));
+    setRefreshing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const pendingTurns = ownerTurns
     .filter(
@@ -62,97 +84,90 @@ export const OwnersHomeScreen = ({ route, navigation }: Props) => {
     );
   }
   return (
-    <SafeAreaView style={{ padding: 16 }}>
-      <View style={{ gap: 8 }}>
-        <TextComponent type="title">Turnos a confirmar</TextComponent>
-        <FlatList
-          horizontal
-          data={pendingTurns}
-          keyExtractor={(item) => item._id}
-          ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
-          renderItem={({ item }) => {
-            const { startDate, endDate } = item;
-            const startDateTime = DateTime.fromISO(startDate).setLocale("es");
-            const endDateTime = DateTime.fromISO(endDate).setLocale("es");
-            return (
-              <TouchableOpacity
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={styles.screenContainer}
+        refreshControl={
+          <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+        }
+      >
+        <View style={{ gap: 8 }}>
+          <TextComponent customStyles={{ paddingHorizontal: 16 }} type="title">
+            Turnos a confirmar
+          </TextComponent>
+          <FlatList
+            style={styles.listStyle}
+            horizontal
+            data={pendingTurns}
+            keyExtractor={(item, idx) => `${item._id}-${idx}`}
+            ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+            renderItem={({ item }) => {
+              return (
+                <PendingConfirmationTurn
+                  turn={item}
+                  onPress={() =>
+                    navigation.navigate("TurnScreen", { turn: item })
+                  }
+                />
+              );
+            }}
+          />
+        </View>
+        {incomingTurns?.length ? (
+          <View style={{ gap: 8 }}>
+            <TextComponent
+              customStyles={{ paddingHorizontal: 16 }}
+              type="title"
+            >
+              Próximos turnos
+            </TextComponent>
+            <FlatList
+              style={styles.listStyle}
+              horizontal
+              data={incomingTurns}
+              keyExtractor={(item) => item._id}
+              ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+              renderItem={({ item }) => {
+                return (
+                  <IncomingTurn
+                    turn={item}
+                    onPress={() =>
+                      navigation.navigate("TurnScreen", { turn: item })
+                    }
+                  />
+                );
+              }}
+            />
+          </View>
+        ) : null}
+
+        <View style={{ gap: 8 }}>
+          <TextComponent customStyles={{ paddingHorizontal: 16 }} type="title">
+            Turnos en curso
+          </TextComponent>
+
+          <FlatList
+            horizontal
+            data={inProgressTurns}
+            keyExtractor={(item) => item._id}
+            ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
+            renderItem={({ item }) => (
+              <InProgressTurn
+                turn={item}
                 onPress={() =>
                   navigation.navigate("TurnScreen", { turn: item })
                 }
-                style={cardStyle}
-              >
-                <Text
-                  style={{ textTransform: "capitalize", fontWeight: "700" }}
-                >
-                  {startDateTime.toLocal().diffNow().days > 2
-                    ? " "
-                    : startDateTime.setLocale("es").toRelativeCalendar({
-                        locale: "es",
-                      })}
-                </Text>
-                <Text>
-                  {startDateTime.toFormat("HH:mm")} -{" "}
-                  {endDateTime.toFormat("HH:mm")}
-                </Text>
-              </TouchableOpacity>
-            );
-          }}
-        />
-
-        <TextComponent type="title">Próximos turnos</TextComponent>
-        <FlatList
-          horizontal
-          data={incomingTurns}
-          keyExtractor={(item) => item._id}
-          ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
-          renderItem={({ item: { startDate, endDate } }) => {
-            const startDateTime = DateTime.fromISO(startDate).setLocale("es");
-            const endDateTime = DateTime.fromISO(endDate).setLocale("es");
-            return (
-              <View style={cardStyle}>
-                <Text
-                  style={{ textTransform: "capitalize", fontWeight: "700" }}
-                >
-                  {startDateTime.toLocal().diffNow().days > 2
-                    ? " "
-                    : startDateTime.setLocale("es").toRelativeCalendar({
-                        locale: "es",
-                      })}
-                </Text>
-                <Text>
-                  {startDateTime.toFormat("HH:mm")} -{" "}
-                  {endDateTime.toFormat("HH:mm")}
-                </Text>
-              </View>
-            );
-          }}
-        />
-
-        <TextComponent type="title">Turnos en curso</TextComponent>
-        {inProgressTurns && inProgressTurns.length
-          ? inProgressTurns.map(({ startDate, endDate }, idx) => {
-              const startDateTime = DateTime.fromISO(startDate);
-              const endDateTime = DateTime.fromISO(endDate);
-
-              return (
-                <View key={`incoming-turn-${idx}`} style={cardStyle}>
-                  <Text
-                    style={{ textTransform: "capitalize", fontWeight: "700" }}
-                  >
-                    {startDateTime.toRelativeCalendar()} -{" "}
-                    <Text style={{ color: "gray", fontWeight: "300" }}>
-                      ({startDateTime.toFormat("d LLL")})
-                    </Text>
-                  </Text>
-                  <Text>
-                    {startDateTime.toFormat("HH:mm")} -{" "}
-                    {endDateTime.toFormat("HH:mm")}
-                  </Text>
-                </View>
-              );
-            })
-          : null}
-      </View>
+              />
+            )}
+            style={styles.listStyle}
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  listStyle: { paddingHorizontal: 16, paddingBottom: 16 },
+  screenContainer: { flex: 1, justifyContent: "flex-start", gap: 8 },
+});
