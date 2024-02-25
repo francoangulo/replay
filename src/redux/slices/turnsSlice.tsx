@@ -55,12 +55,6 @@ export const ownerTurnsSlice = createSlice({
       };
     },
     updateTurn: (state, action: PayloadAction<Turn>) => {
-      console.log(
-        "franco current turns",
-        JSON.stringify(state.ownerTurns, null, 4)
-      );
-      console.log("franco new turn", JSON.stringify(action.payload, null, 4));
-
       return {
         ...state,
         allTurns: [
@@ -100,7 +94,7 @@ export const getOwnerTurns =
       const resp = await replayAPI.get<TurnsResponse>("/turns", { params });
       dispatch(setOwnerTurns(resp.data.turns));
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 
@@ -111,7 +105,7 @@ export const getPlayerTurns =
       const resp = await replayAPI.get<TurnsResponse>("/turns", { params });
       dispatch(setPlayerTurns(resp.data.turns));
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 
@@ -120,7 +114,7 @@ export const getAllTurns = () => async (dispatch: AppDispatch) => {
     const resp = await replayAPI.get<TurnsResponse>("/turns");
     dispatch(setAllTurns(resp.data.turns));
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
   }
 };
 
@@ -169,7 +163,7 @@ export const createTurn =
       dispatch(setOwnerTurns([resp.data.newTurn]));
       callback(resp.data.newTurn);
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 
@@ -178,7 +172,7 @@ export const emptyTurns = () => async (dispatch: AppDispatch) => {
     await replayAPI.delete<CreateTurnResponse>("/turns/all");
     dispatch(resetAllTurns());
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
   }
 };
 
@@ -195,7 +189,7 @@ export const confirmTurn =
       dispatch(updateTurn(resp.data.confirmedTurn));
       callback(resp.data.confirmedTurn);
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 

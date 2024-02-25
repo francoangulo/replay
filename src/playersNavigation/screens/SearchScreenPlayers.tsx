@@ -67,7 +67,6 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
   const filterByLocation = (kmDistance: number) => {
     Geolocation.getCurrentPosition(
       ({ coords: { latitude, longitude } }) => {
-        console.log({ latitude, longitude });
         const locationFilteredComplexes = complexes.filter((complex) => {
           const haversineDistance = haversine(
             latitude,
@@ -82,7 +81,7 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
       },
       (error) => {
         // See error code charts below.
-        console.log(error.code, error.message);
+        console.error(error.code, error.message);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
     );

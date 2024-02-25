@@ -34,10 +34,7 @@ export const MapScreenPlayers = ({ navigation }: Props) => {
     {}
   );
   const [selectedComplex, setSelectedComplex] = useState<Complex | undefined>();
-  console.log(
-    "franco selected Complex: ",
-    JSON.stringify(selectedComplex, null, 4)
-  );
+
   const destination = {
     latitude: complexes[0].latitude,
     longitude: complexes[0].longitude,
@@ -95,21 +92,15 @@ export const MapScreenPlayers = ({ navigation }: Props) => {
     locationPermission &&
       Geolocation.getCurrentPosition(
         ({ coords: { latitude, longitude } }) => {
-          console.log({ latitude, longitude });
           setUserLocation({ latitude, longitude });
         },
         (error) => {
           // See error code charts below.
-          console.log(error.code, error.message);
+          console.error(error.code, error.message);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
       );
   }, [locationPermission]);
-
-  console.log(
-    "franco permission status",
-    JSON.stringify(locationPermission, null, 4)
-  );
 
   return (
     <View style={{ flex: 1 }}>

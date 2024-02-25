@@ -54,8 +54,6 @@ export const LoginScreen = ({ navigation, route }: Props) => {
   };
 
   const submitDevPlayer = async () => {
-    console.log("hello=");
-
     dispatch(
       loginUser({
         email: "francoplayer@gmail.com",

@@ -13,11 +13,12 @@ import { Turn } from "../../interfaces/Turns";
 import { BookedTurnScreen } from "../screens/BookedTurnScreen";
 
 export type SearchStackParamList = {
-  Search: undefined;
+  Search: { paramsComplex?: Complex };
   ComplexScreen: {
     complex: Complex;
     availableTurns: AvailableTurn[];
     getAvailableTurns: (
+      complex: Complex,
       selectedDate: DateTime,
       toState: boolean
     ) => AvailableTurn[];
@@ -60,7 +61,8 @@ const screens: Screen[] = [
   },
 ];
 
-export const SearchNavigatorPlayers = () => {
+interface SearchNavigatorPlayersProps extends StackScreenProps<any, any> {}
+export const SearchNavigatorPlayers = ({}: SearchNavigatorPlayersProps) => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -70,7 +72,7 @@ export const SearchNavigatorPlayers = () => {
     >
       {screens.map(({ name, component, options }, index) => (
         <Stack.Screen
-          key={`owner-tab-${index}`}
+          key={`players-search-stack-${index}`}
           name={name}
           component={component}
           options={options}

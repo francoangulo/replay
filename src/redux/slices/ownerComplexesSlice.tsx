@@ -77,7 +77,7 @@ export const getOwnerComplexes =
       });
       dispatch(setOwnerComplexes(resp.data.complexes));
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 

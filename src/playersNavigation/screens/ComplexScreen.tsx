@@ -53,6 +53,7 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
   const [selectedPlayersAmount, setSelectedPlayersAmount] = useState<number>(
     playersAmountsSelectors[0] || 5
   );
+
   const [loading, setLoading] = useState(true);
   const [selectedTurn, setSelectedTurn] = useState<SelectedTurnState>({});
   const [modalVisible, setModalVisible] = useState(false);
@@ -80,6 +81,7 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
           )
         )
       );
+      setLoading(false);
       setSelectedPlayersAmount(playersAmountsSelectors[0] || 5);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,6 +89,7 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
 
   useEffect(() => {
     const newTurns = getAvailableTurns(
+      complex,
       DateTime.fromFormat(selectedDateString, "yyyy-MM-dd"),
       false
     );

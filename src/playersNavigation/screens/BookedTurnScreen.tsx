@@ -29,7 +29,7 @@ export const BookedTurnScreen = ({ route }: Props) => {
           //   }),
         });
       } catch (e) {
-        console.log("e", e);
+        console.error("e", e);
       }
     }, 500);
   }, []);

@@ -76,7 +76,7 @@ export const TurnScreen = ({ navigation, route }: Props) => {
           throw new Error("Ocurrió un problema al compartir el turno");
         }
       } catch (e) {
-        console.log("e", e);
+        console.error("e", e);
       }
     }, 500);
   }, []);

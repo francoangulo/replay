@@ -89,7 +89,7 @@ export const getComplexes = () => async (dispatch: AppDispatch) => {
     const resp = await replayAPI.get<ComplexesResponse>("/complexes");
     dispatch(setComplexes(resp.data.complexes));
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
   }
 };
 
@@ -110,7 +110,7 @@ export const postComplex =
       dispatch(setOwnerComplexes([resp.data.newComplex]));
       callback(resp.data.newComplex._id);
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 
@@ -126,7 +126,7 @@ export const deleteComplex =
       dispatch(removeOwnerComplex(complexId));
       callback();
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 
@@ -177,7 +177,7 @@ export const postFootballFields =
       );
       callback();
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 
@@ -218,7 +218,7 @@ export const postComplexSchedules =
       );
       callback();
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 

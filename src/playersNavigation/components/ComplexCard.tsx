@@ -16,9 +16,10 @@ import { selectTurns } from "../../redux/slices/turnsSlice";
 
 interface Props extends StackScreenProps<any, any> {
   complex: Complex;
+  paramsComplex?: Complex;
 }
 
-export const ComplexCard = ({ navigation, complex }: Props) => {
+export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
   const { allTurns } = useAppSelector(selectTurns);
   const {
     availableTurns,
@@ -33,7 +34,7 @@ export const ComplexCard = ({ navigation, complex }: Props) => {
   const { name, address } = complex;
 
   useEffect(() => {
-    getAvailableTurns();
+    getAvailableTurns(complex);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allTurns]);
 

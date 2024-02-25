@@ -43,7 +43,7 @@ export const loginOwner = (email: string) => async (dispatch: AppDispatch) => {
     const resp = await replayAPI.get<OwnerResponse>("/owners", { params });
     dispatch(login({ ...resp.data.owner, userType: "owner" }));
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
   }
 };
 
@@ -83,15 +83,13 @@ export const loginPlayer =
         callback && callback("player");
       }
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 
 export const loginUser =
   ({ email, password, callback, userId, token }: LoginProps) =>
   async (dispatch: AppDispatch) => {
-    console.log("HELLO THERE?");
-
     try {
       if (email && password) {
         const body = { email, password };
@@ -131,7 +129,7 @@ export const loginUser =
         }
       }
     } catch (error) {
-      console.log("error logging in user: ", error);
+      console.error("error logging in user: ", error);
     }
   };
 
@@ -154,7 +152,7 @@ export const registerPlayer =
       }
       // dispatch(login({ ...resp.data.player, userType: "player" }));
     } catch (error) {
-      console.log({ error });
+      console.error({ error });
     }
   };
 
