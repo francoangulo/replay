@@ -27,10 +27,12 @@ export const ComplexBanner = ({ complex }: BannerProps) => {
         {complex?.ComplexSchedules?.map(
           ({ openingTime, closingTime, weekDays }, idx) => {
             return (
-              <View style={styles.chipContainer} key={`schedule-${idx}`}>
+              <View style={styles.chipContainer} key={`complex-banner-${idx}`}>
                 <View style={styles.weekdaysContainer}>
-                  {weekDays?.map((day) => (
-                    <Text>{weekdaysReference[day]}</Text>
+                  {weekDays?.map((day, weekDayIndex) => (
+                    <Text key={`weekday-${weekDayIndex}`}>
+                      {weekdaysReference[day]}
+                    </Text>
                   ))}
                 </View>
                 <Text>
