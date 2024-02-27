@@ -30,9 +30,10 @@ export const PlayersAmountSelector = ({
           ...styles.turnsListContainer,
         }}
       >
-        {playersAmountsSelectors.map((playersAmount) => {
+        {playersAmountsSelectors.map((playersAmount, index) => {
           return (
             <TouchableOpacity
+              key={`players-amount-selector-${index}`}
               style={{
                 ...styles.turnButton,
                 ...(selectedPlayersAmount === playersAmount && {
