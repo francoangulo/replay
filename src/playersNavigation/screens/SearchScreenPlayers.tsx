@@ -16,10 +16,9 @@ import { Complex } from "../../interfaces/complexes";
 
 import Geolocation from "react-native-geolocation-service";
 import { checkLocationPermission, haversine } from "../../utils/utils";
-import { FadeModal } from "../../ownersNavigation/components/FadeModal";
 import { FadeModalState } from "../../interfaces/FadeModal";
 import { colors } from "../../theme/appTheme";
-import { DistanceModalContent } from "../components/DistanceModalContent";
+import { DistanceModal } from "../components/SearchScreen/DistanceModal";
 
 interface Props extends StackScreenProps<any, any> {}
 
@@ -27,6 +26,8 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
   const { complexes } = useAppSelector(selectComplexes);
   const [filteredComplexes, setFilteredComplexes] =
     useState<Complex[]>(complexes);
+
+  const paramsComplex = route.params?.paramsComplex;
 
   const [filterValue, setFilterValue] = useState("");
   const [kilometersDistanceState, setKilometersDistanceState] = useState(5);
@@ -59,9 +60,11 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
   };
 
   const getNearComplexes = () => {
-    checkLocationPermission(() =>
-      setDistanceModalState({ ...distanceModalState, visible: true })
-    );
+    checkLocationPermission({
+      onGranted: () =>
+        setDistanceModalState({ ...distanceModalState, visible: true }),
+      onDenied: () => {},
+    });
   };
 
   const filterByLocation = (kmDistance: number) => {
@@ -73,6 +76,14 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
             longitude,
             complex.latitude,
             complex.longitude
+          );
+          console.log(
+            "franco the haversine distance: ",
+            JSON.stringify(haversineDistance, null, 4)
+          );
+          console.log(
+            "franco the km distance: ",
+            JSON.stringify(kmDistance, null, 4)
           );
           return haversineDistance <= kmDistance;
         });
@@ -87,33 +98,36 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
     );
   };
 
+  const onDistanceInputChange = (distance: number) => {
+    setKilometersDistanceState(distance);
+  };
+
+  const onDistanceCancel = () => {
+    setDistanceModalState({
+      ...distanceModalState,
+      visible: false,
+    });
+  };
+
+  const onDistanceConfirm = () => {
+    setDistanceModalState({
+      ...distanceModalState,
+      visible: false,
+    });
+    kilometersDistanceState && filterByLocation(kilometersDistanceState);
+  };
+
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <View style={styles.screenContainer}>
-        <FadeModal
-          modalState={distanceModalState}
-          setModalState={setDistanceModalState}
-          modalContent={() =>
-            DistanceModalContent({
-              onInputChange: (distance: number) => {
-                setKilometersDistanceState(distance);
-              },
-              onCancel: () =>
-                setDistanceModalState({
-                  ...distanceModalState,
-                  visible: false,
-                }),
-              onConfirm: () => {
-                setDistanceModalState({
-                  ...distanceModalState,
-                  visible: false,
-                });
-                kilometersDistanceState &&
-                  filterByLocation(kilometersDistanceState);
-              },
-            })
-          }
+        <DistanceModal
+          distanceModalState={distanceModalState}
+          setDistanceModalState={setDistanceModalState}
+          onInputChange={onDistanceInputChange}
+          onCancel={onDistanceCancel}
+          onConfirm={onDistanceConfirm}
         />
+
         <View style={styles.searchBarContainer}>
           <IonIcon name="search-outline" size={20} />
           <TextInput
@@ -133,6 +147,7 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
               complex={complex}
               navigation={navigation}
               route={route}
+              paramsComplex={paramsComplex}
             />
           )}
           // eslint-disable-next-line react/no-unstable-nested-components

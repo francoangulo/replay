@@ -34,6 +34,28 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
   const { name, address } = complex;
 
   useEffect(() => {
+    const focusListener = navigation.addListener("focus", () => {
+      if (paramsComplex) {
+        if (paramsComplex._id === complex._id) {
+          navigation.setParams({ paramsComplex: null });
+
+          navigation.navigate("ComplexScreen", {
+            complex,
+            availableTurns,
+            getAvailableTurns,
+            playersAmountsSelectors,
+            getPlayersAmountsSelectors,
+          });
+        }
+      }
+    });
+
+    return () => {
+      focusListener();
+    };
+  }, []);
+
+  useEffect(() => {
     getAvailableTurns(complex);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allTurns]);

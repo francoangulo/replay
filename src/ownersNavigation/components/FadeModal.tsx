@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Modal, StyleSheet, View } from "react-native";
+import { Modal, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { colors } from "../../theme/appTheme";
 import { FadeModalState, SetModalState } from "../../interfaces/FadeModal";
 
@@ -7,12 +7,14 @@ interface Props {
   modalState: FadeModalState;
   setModalState: SetModalState;
   modalContent: () => React.JSX.Element;
+  customFadeContainerStyle?: StyleProp<ViewStyle>;
 }
 
 export const FadeModal = ({
   modalState,
   setModalState,
   modalContent,
+  customFadeContainerStyle = {},
 }: Props) => {
   useEffect(() => {
     modalState.visible === true &&
@@ -23,9 +25,11 @@ export const FadeModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalState]);
 
+  const fadeContainerStyle = [styles.fadeContainer, customFadeContainerStyle];
+
   return (
     <Modal animationType="fade" transparent={true} visible={modalState.visible}>
-      <View style={styles.fadeContainer}>
+      <View style={fadeContainerStyle}>
         <View style={styles.cardContainer}>{modalContent()}</View>
       </View>
     </Modal>
