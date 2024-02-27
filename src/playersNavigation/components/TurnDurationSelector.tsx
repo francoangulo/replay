@@ -30,7 +30,7 @@ export const TurnDurationSelector = ({
           ...styles.turnsListContainer,
         }}
       >
-        {durations.map((duration) => {
+        {durations.map((duration, index) => {
           const isAvailable = filteredTurns.find(
             ({ turnTime }) =>
               (selectedTurn?.turnTime && duration === 60) ||
@@ -40,6 +40,7 @@ export const TurnDurationSelector = ({
           );
           return (
             <TouchableOpacity
+              key={`duration-selector-${index}`}
               style={{
                 ...styles.turnButton,
                 ...(selectedTurn?.duration === duration && {
