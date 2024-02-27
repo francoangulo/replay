@@ -4,6 +4,7 @@ import { colors } from "../../theme/appTheme";
 import { AvailableTurn } from "../../hooks/useAvailableTurns";
 import MCIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { SelectedTurnState } from "../screens/ComplexScreen";
+import { minutesToHours } from "../../utils/utils";
 
 interface Props {
   selectedTurn?: SelectedTurnState;
@@ -18,7 +19,9 @@ export const TurnDurationSelector = ({
   filteredTurns,
   setSelectedTurn,
 }: Props) => {
-  if (!filteredTurns?.length) return <></>;
+  if (!filteredTurns?.length) {
+    return <></>;
+  }
   return (
     <View style={styles.cardContainer}>
       <View style={styles.titleContainer}>
@@ -114,9 +117,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
-const minutesToHours = (minute: 60 | 90 | 120) => {
-  const hour = Math.trunc(minute / 60);
-  const minutes = minute % 60;
-  return { hour, minutes };
-};

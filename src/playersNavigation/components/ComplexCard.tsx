@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import {
   ActivityIndicator,
   Image,
-  Text,
+  StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -13,6 +13,7 @@ import IonIcon from "react-native-vector-icons/Ionicons";
 import { useAvailableTurns } from "../../hooks/useAvailableTurns";
 import { useAppSelector } from "../../hooks/redux";
 import { selectTurns } from "../../redux/slices/turnsSlice";
+import { TextComponent } from "../../components/TextComponent";
 
 interface Props extends StackScreenProps<any, any> {
   complex: Complex;
@@ -33,12 +34,18 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
   });
   const { name, address } = complex;
 
+  // Following useEffect adds a listener for the screen focus. Each time the user pops this screen on top
   useEffect(() => {
     const focusListener = navigation.addListener("focus", () => {
+      // If we receive a complex, it comes from MapScreen (ViewTurns action)
       if (paramsComplex) {
+        // If this is the matching complex, we navigate to ComplexScreen
         if (paramsComplex._id === complex._id) {
+          // First remove the param to avoid jumping to ComplexScreen
+          // every time this screen is focused
           navigation.setParams({ paramsComplex: null });
 
+          // Then jump into the ComplexScreen
           navigation.navigate("ComplexScreen", {
             complex,
             availableTurns,
@@ -50,9 +57,11 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
       }
     });
 
+    // Make sure to remove the event listener when screen unmounts
     return () => {
       focusListener();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -83,44 +92,24 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
         });
       }}
     >
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <View style={{ gap: 16 }}>
-          <Text
-            style={{
-              textTransform: "capitalize",
-              fontWeight: "700",
-            }}
-          >
-            {name}
-          </Text>
-          <View style={{ gap: 4 }}>
-            <View
-              style={{ flexDirection: "row", gap: 4, alignItems: "center" }}
-            >
+      <View style={styles.contentContainer}>
+        <View style={styles.infoContainer}>
+          <TextComponent type="title" children={name} />
+          <View style={styles.subtitlesContainer}>
+            <View style={styles.infoRow}>
+              <IonIcon name="time-outline" size={20} color={colors.primary} />
+              <TextComponent
+                type="subtitle"
+                children={`${turnsAmount} turnos disponibles hoy`}
+              />
+            </View>
+            <View style={styles.infoRow}>
               <IonIcon
                 name="location-outline"
                 size={20}
                 color={colors.primary}
               />
-              <Text
-                style={{
-                  color: "gray",
-                }}
-              >
-                {address}
-              </Text>
-            </View>
-            <View
-              style={{ flexDirection: "row", gap: 4, alignItems: "center" }}
-            >
-              <IonIcon name="time-outline" size={20} color={colors.primary} />
-              <Text
-                style={{
-                  color: "gray",
-                }}
-              >
-                {turnsAmount} turnos disponibles hoy
-              </Text>
+              <TextComponent type="text" children={address} />
             </View>
           </View>
         </View>
@@ -129,9 +118,17 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
           source={{
             uri: "https://beneficios.lacapital.com.ar/media/cache/16/00/160057f1cc2bf346e91e1475fb3dc0af.jpg",
           }}
-          style={{ width: 100, height: 100, borderRadius: 8 }}
+          style={styles.complexImage}
         />
       </View>
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  contentContainer: { flexDirection: "row", justifyContent: "space-between" },
+  infoContainer: { gap: 16 },
+  subtitlesContainer: { gap: 4 },
+  infoRow: { flexDirection: "row", gap: 4, alignItems: "center" },
+  complexImage: { width: 100, height: 100, borderRadius: 8 },
+});

@@ -11,7 +11,7 @@ interface Props {
 export const LocationPermissionModal = ({ handleGrant }: Props) => {
   return (
     <View style={styles.permissionsModalFade}>
-      <View style={[cardStyle, { width: "70%", gap: 16 }]}>
+      <View style={[cardStyle, styles.contentContainer]}>
         <TextComponent type="title" children={"Permisos requeridos"} />
         <TextComponent
           type="text"
@@ -25,10 +25,10 @@ export const LocationPermissionModal = ({ handleGrant }: Props) => {
             "Por favor, otorga los permisos necesarios en la configuración de tu dispositivo."
           }
         />
-        <View style={{ flexDirection: "row", gap: 8 }}>
+        <View style={styles.buttonContainer}>
           <GenericButton
             buttonText="Otorgar"
-            customButtonStyle={{ flex: 1 }}
+            customButtonStyle={styles.button}
             onButtonPress={handleGrant}
             buttonType="primary"
           />
@@ -48,4 +48,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  contentContainer: { width: "70%", gap: 16 },
+  buttonContainer: { flexDirection: "row", gap: 8 },
+  button: { flex: 1 },
 });

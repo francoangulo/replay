@@ -246,3 +246,16 @@ export const onViewLocation = (complex: Complex): void => {
 
   Linking.openURL(url);
 };
+
+/**
+ * Converts the given duration in minutes to hours and remaining minutes.
+ *
+ * @param {60 | 90 | 120} minute - The duration in minutes (valid options: 60, 90, 120).
+ * @returns {{ hour: number, minutes: number }} - An object containing the converted hours and remaining minutes.
+ */
+
+export const minutesToHours = (minute: 60 | 90 | 120) => {
+  const hour = Math.trunc(minute / 60);
+  const minutes = minute % 60;
+  return { hour, minutes };
+};
