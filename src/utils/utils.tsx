@@ -9,7 +9,16 @@ import {
 } from "react-native-permissions";
 import { Complex } from "../interfaces/complexes";
 
-export const getRandomPastelColor = (number: number) => {
+/**
+ * Generates a random pastel color based on the given number.
+ *
+ * @param {number} [number] - Optional parameter used to influence the color generation.
+ * If not provided, a random number will be used.
+ *
+ * @returns {string} - A hexadecimal representation of the generated pastel color.
+ */
+
+export const getRandomPastelColor = (number: number): string => {
   //   const random = Math.random();
   const h = Math.floor((number || Math.random()) * 360);
   const s = 70;
@@ -17,7 +26,7 @@ export const getRandomPastelColor = (number: number) => {
 
   const hDecimal = l / 100;
   const a = (s * Math.min(hDecimal, 1 - hDecimal)) / 100;
-  const f = (n) => {
+  const f = (n: number) => {
     const k = (n + h / 30) % 12;
     const color = hDecimal - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
 
@@ -29,13 +38,23 @@ export const getRandomPastelColor = (number: number) => {
   return `#${f(0)}${f(8)}${f(4)}`;
 };
 
-// Haversine formula to calculate the distance between two coordinates
+/**
+ * Calculates the haversine distance between two geographical coordinates using the Earth's radius.
+ *
+ * @param {number} lat1 - Latitude of the first point in decimal degrees.
+ * @param {number} lon1 - Longitude of the first point in decimal degrees.
+ * @param {number} lat2 - Latitude of the second point in decimal degrees.
+ * @param {number} lon2 - Longitude of the second point in decimal degrees.
+ *
+ * @returns {number} - The haversine distance between the two points in kilometers.
+ */
+
 export const haversine = (
   lat1: number,
   lon1: number,
   lat2: number,
   lon2: number
-) => {
+): number => {
   const R = 6371; // Radius of the Earth in kilometers
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
@@ -55,18 +74,35 @@ interface CheckLocationProps {
   onDenied?: (permissionStatus: PermissionStatus) => void;
 }
 
+/**
+ * Checks and manages location permissions on the device.
+ *
+ * @async
+ * @param {object} options - Options for handling permission status.
+ * @param {Function} [options.onGranted=() => {}] - Callback function to be executed when permission is granted.
+ * @param {Function} [options.onDenied=() => {}] - Callback function to be executed when permission is denied.
+ *
+ * @returns {Promise<void>} - Resolves when the permission status is checked and appropriate actions are taken.
+ *
+ * @throws {Error} - Throws an error if the permission check encounters an unexpected state.
+ */
+
 export const checkLocationPermission = async ({
   onGranted = () => {},
   onDenied = () => {},
-}: CheckLocationProps) => {
+}: CheckLocationProps): Promise<void> => {
   let permissionStatus: PermissionStatus;
+  // First check the permission status
   if (Platform.OS === "ios") {
     permissionStatus = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
   } else {
     permissionStatus = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
   }
+
+  // Action based on the permission status
   switch (permissionStatus) {
     case RESULTS.UNAVAILABLE:
+      // Just unavailable, nothing we can do here
       Alert.alert(
         "No disponible",
         "Esta función no está disponible en tu dispositivo",
@@ -74,6 +110,8 @@ export const checkLocationPermission = async ({
       );
       break;
     case RESULTS.DENIED:
+      // Denied, but requestable
+      // Inform the user about the need for the location
       Alert.alert(
         "Ubicación necesaria",
         "Necesitamos conocer su ubicación para mostrarle los complejos cercanos",
@@ -81,6 +119,7 @@ export const checkLocationPermission = async ({
           {
             text: "Aceptar",
             onPress: async () =>
+              // Ask for the permission
               await askLocationPermission({ onGranted, onDenied }),
           },
         ],
@@ -88,9 +127,12 @@ export const checkLocationPermission = async ({
       );
       break;
     case RESULTS.GRANTED || RESULTS.LIMITED:
+      // Already granted, callback()
       onGranted(permissionStatus);
       break;
     case RESULTS.BLOCKED:
+      // Blocked, not requestable any more
+      // We need the user to go to settings and manually enable it
       Alert.alert(
         "Ubicación necesaria",
         "Por favor, necesitamos conocer su ubicación para mostrarle los complejos cercanos",
@@ -109,19 +151,30 @@ interface AskLocationProps {
   onDenied?: (permissionStatus: PermissionStatus) => void;
 }
 
+/**
+ * Asks for location permission and executes specified callbacks based on the result.
+ *
+ * @param {AskLocationProps} options - Options for handling permission status.
+ * @returns {Promise<void>} - Resolves when the permission status is checked and appropriate actions are taken.
+ * @throws {Error} - Throws an error if the permission check encounters an unexpected state.
+ */
+
 const askLocationPermission = async ({
   onGranted = () => {},
   onDenied = () => {},
 }: AskLocationProps) => {
   let permissionResult: PermissionStatus;
+  // Ask for the permission
   if (Platform.OS === "ios") {
     permissionResult = await request(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
   } else {
     permissionResult = await request(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
   }
 
+  // Action based on the permission result
   switch (permissionResult) {
     case RESULTS.UNAVAILABLE:
+      // Just unavailable, nothing we can do here
       Alert.alert(
         "No disponible",
         "Esta función no está disponible en tu dispositivo",
@@ -130,6 +183,8 @@ const askLocationPermission = async ({
 
       break;
     case RESULTS.DENIED:
+      // Denied, but requestable
+      // Inform the user about the need for the location
       Alert.alert(
         "Ubicación necesaria",
         "Por favor, necesitamos conocer su ubicación para mostrarle los complejos cercanos",
@@ -137,6 +192,7 @@ const askLocationPermission = async ({
           {
             text: "Aceptar",
             onPress: async () =>
+              // Ask for the permission
               await askLocationPermission({ onGranted, onDenied }),
           },
           { text: "Cancelar", onPress: () => onDenied(permissionResult) },
@@ -145,9 +201,12 @@ const askLocationPermission = async ({
       );
       break;
     case RESULTS.GRANTED || RESULTS.LIMITED:
+      // Already granted, callback()
       onGranted(permissionResult);
       break;
     case RESULTS.BLOCKED:
+      // Blocked, not requestable any more
+      // We need the user to go to settings and manually enable it
       Alert.alert(
         "Ubicación necesaria",
         "Por favor, necesitamos conocer su ubicación para mostrarle los complejos cercanos",
@@ -161,7 +220,19 @@ const askLocationPermission = async ({
   }
 };
 
-export const onViewLocation = (complex: Complex) => {
+/**
+ * Opens the device's map application to view the location of a complex.
+ *
+ * @param {Complex} complex - The complex object containing location details.
+ * @param {number} complex.latitude - The latitude of the complex.
+ * @param {number} complex.longitude - The longitude of the complex.
+ * @param {string} complex.name - The name or label of the complex.
+ *
+ * @returns {void} - This function does not return anything.
+ *
+ */
+
+export const onViewLocation = (complex: Complex): void => {
   const scheme = Platform.select({
     ios: "maps://0,0?q=",
     android: "geo:0,0?q=",
