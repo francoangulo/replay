@@ -1,13 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
-import ownerComplexesReducer from "./slices/ownerComplexesSlice";
 import turnsReducer from "./slices/turnsSlice";
 import complexesReducer from "./slices/complexesSlice";
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
-    ownerComplexes: ownerComplexesReducer,
     complexes: complexesReducer,
     turns: turnsReducer,
   },

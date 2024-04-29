@@ -99,7 +99,7 @@ export const LoginScreen = ({ navigation, route }: Props) => {
         rowGap: 32,
       }}
     >
-      {!["local", "localphy"].includes(Config.SELECTED_ENVIRONMENT) ? (
+      {["local", "localphy"].includes(Config.SELECTED_ENVIRONMENT) ? (
         <>
           <View
             style={{

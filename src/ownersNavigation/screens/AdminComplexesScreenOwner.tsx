@@ -1,44 +1,31 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import React from "react";
-import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { cardStyle, colors, paddings } from "../../theme/appTheme";
-import { TextComponent } from "../../components/TextComponent";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { paddings } from "../../theme/appTheme";
 import { useAppSelector } from "../../hooks/redux";
-import { selectOwnerComplexes } from "../../redux/slices/ownerComplexesSlice";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { ComplexCard } from "../components/ComplexCard";
+import { selectComplexes } from "../../redux/slices/complexesSlice";
+import { GenericButton } from "../../components/GenericButton";
 
 interface Props extends StackScreenProps<any, any> {}
 
 export const AdminComplexesScreenOwner = ({ navigation, route }: Props) => {
-  const { ownerComplexes } = useAppSelector(selectOwnerComplexes);
+  const { complexes } = useAppSelector(selectComplexes);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.screenContainer}>
       <ScreenHeader
         title="Complejos deportivos"
         navigation={navigation}
         route={route}
       />
-      <View
-        style={{
-          padding: paddings.globalPadding,
-          flex: 1,
-          justifyContent: "space-between",
-        }}
-      >
+      <View style={styles.contentContainer}>
         <ScrollView
-          contentContainerStyle={{ rowGap: 16, paddingBottom: 16 }}
-          style={{ rowGap: 16, paddingBottom: 16 }}
+          contentContainerStyle={styles.scrollViewContentStyle}
+          style={styles.scrolLViewStyle}
         >
-          {ownerComplexes?.map((complex, idx) => {
+          {complexes?.map((complex, idx) => {
             return (
               <ComplexCard
                 key={`complex-${idx}`}
@@ -50,21 +37,28 @@ export const AdminComplexesScreenOwner = ({ navigation, route }: Props) => {
             );
           })}
         </ScrollView>
-        <TouchableOpacity
-          style={{
-            backgroundColor: colors.primary,
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            borderRadius: 4,
-            alignItems: "center",
-          }}
-          onPress={() => navigation.navigate("AddComplexScreen")}
-        >
-          <Text style={{ color: colors.appBg, fontWeight: "bold" }}>
-            Añadir Complejo
-          </Text>
-        </TouchableOpacity>
+        <GenericButton
+          buttonText="Añadir Complejo"
+          onButtonPress={() => navigation.navigate("AddComplexScreen")}
+          buttonType="primary"
+        />
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screenContainer: { flex: 1 },
+  contentContainer: {
+    padding: paddings.globalPadding,
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  scrollViewContentStyle: {
+    rowGap: 16,
+    paddingBottom: 16,
+    flexDirection: "row",
+    gap: 8,
+  },
+  scrolLViewStyle: { rowGap: 16, paddingBottom: 16 },
+});

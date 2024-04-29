@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -14,6 +14,7 @@ import { useAvailableTurns } from "../../hooks/useAvailableTurns";
 import { useAppSelector } from "../../hooks/redux";
 import { selectTurns } from "../../redux/slices/turnsSlice";
 import { TextComponent } from "../../components/TextComponent";
+import { useComplexMainPicture } from "../../hooks/useComplexMainPicture";
 
 interface Props extends StackScreenProps<any, any> {
   complex: Complex;
@@ -21,6 +22,11 @@ interface Props extends StackScreenProps<any, any> {
 }
 
 export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
+  const { complexMainPicture } = useComplexMainPicture({
+    complexId: complex._id,
+    mainPictureKey: complex.mainPictureKey,
+  });
+  const [loadingImage, setLoadingImage] = useState(true);
   const { allTurns } = useAppSelector(selectTurns);
   const {
     availableTurns,
@@ -79,6 +85,8 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
     return acc;
   }, 0);
 
+  console.log({ loadingImage });
+
   return (
     <TouchableOpacity
       style={cardStyle}
@@ -113,13 +121,33 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
             </View>
           </View>
         </View>
-
-        <Image
-          source={{
-            uri: "https://beneficios.lacapital.com.ar/media/cache/16/00/160057f1cc2bf346e91e1475fb3dc0af.jpg",
-          }}
-          style={styles.complexImage}
-        />
+        <View
+          style={[
+            styles.complexImagePlaceholderContainer,
+            { ...(!loadingImage && { display: "none" }) },
+          ]}
+        >
+          <ActivityIndicator color={colors.primary} />
+        </View>
+        {complexMainPicture && (
+          <Image
+            source={{
+              uri: complexMainPicture,
+            }}
+            style={[
+              styles.complexImage,
+              {
+                ...(loadingImage && {
+                  width: 1,
+                  height: 1,
+                  position: "absolute",
+                  opacity: 0,
+                }),
+              },
+            ]}
+            onLoad={() => setLoadingImage(false)}
+          />
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -130,5 +158,11 @@ const styles = StyleSheet.create({
   infoContainer: { gap: 16 },
   subtitlesContainer: { gap: 4 },
   infoRow: { flexDirection: "row", gap: 4, alignItems: "center" },
+  complexImagePlaceholderContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    justifyContent: "center",
+  },
   complexImage: { width: 100, height: 100, borderRadius: 8 },
 });

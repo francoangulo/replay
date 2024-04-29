@@ -5,9 +5,10 @@ import { FadeModalState, SetModalState } from "../../interfaces/FadeModal";
 
 interface Props {
   modalState: FadeModalState;
-  setModalState: SetModalState;
+  setModalState?: SetModalState;
   modalContent: () => React.JSX.Element;
   customFadeContainerStyle?: StyleProp<ViewStyle>;
+  customCardContainerStyle?: StyleProp<ViewStyle>;
 }
 
 export const FadeModal = ({
@@ -15,22 +16,24 @@ export const FadeModal = ({
   setModalState,
   modalContent,
   customFadeContainerStyle = {},
+  customCardContainerStyle = {},
 }: Props) => {
   useEffect(() => {
     modalState.visible === true &&
       modalState.autoDismiss &&
       setTimeout(() => {
-        setModalState({ ...modalState, visible: false });
+        setModalState && setModalState({ ...modalState, visible: false });
       }, 3000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalState]);
 
   const fadeContainerStyle = [styles.fadeContainer, customFadeContainerStyle];
+  const cardContainerStyle = [styles.cardContainer, customCardContainerStyle];
 
   return (
     <Modal animationType="fade" transparent={true} visible={modalState.visible}>
       <View style={fadeContainerStyle}>
-        <View style={styles.cardContainer}>{modalContent()}</View>
+        <View style={cardContainerStyle}>{modalContent()}</View>
       </View>
     </Modal>
   );
@@ -48,7 +51,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: colors.appBg,
     padding: 32,
-    borderRadius: 5,
+    borderRadius: 24,
     flex: 1,
   },
 });

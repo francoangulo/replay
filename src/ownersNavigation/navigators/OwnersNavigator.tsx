@@ -8,16 +8,14 @@ import { colors } from "../../theme/appTheme";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { selectAuth } from "../../redux/slices/authSlice";
 import { ActivityIndicator } from "react-native";
-import {
-  getOwnerComplexes,
-  selectOwnerComplexes,
-} from "../../redux/slices/ownerComplexesSlice";
 import { getOwnerTurns, selectTurns } from "../../redux/slices/turnsSlice";
 import { ProfileNavigatorOwners } from "./ProfileNavigatorOwners";
 import ADIcon from "react-native-vector-icons/AntDesign";
 import { OnboardingTabsParamsList } from "../../mainNavigation/navigators/OnboardingNavigator";
 import { CalendarNavigator } from "./CalendarNavigator";
 import { HomeNavigator } from "./HomeNavigator";
+import { getComplexes } from "../../redux/actions/complexes";
+import { selectComplexes } from "../../redux/slices/complexesSlice";
 
 export type TabsParamsList = {
   HomeNavigator: { turnIdParam?: string };
@@ -75,11 +73,11 @@ export const OwnersTabNavigator = ({ route }: Props) => {
   const turnIdParam = route.params?.turnIdParam ?? "";
   const { _id: ownerId } = useAppSelector(selectAuth);
   const { loadingOwnerTurns: loadingTurns } = useAppSelector(selectTurns);
-  const { loading } = useAppSelector(selectOwnerComplexes);
+  const { loading } = useAppSelector(selectComplexes);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    loading && ownerId.length && dispatch(getOwnerComplexes(ownerId));
+    loading && ownerId.length && dispatch(getComplexes(ownerId));
     ownerId && loadingTurns && dispatch(getOwnerTurns(ownerId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ownerId]);

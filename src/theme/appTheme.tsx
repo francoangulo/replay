@@ -44,14 +44,21 @@ export const cardStyle: StyleProp<ViewStyle> = {
 };
 
 export const titleStyle: StyleProp<TextStyle> = {
-  fontWeight: "bold",
+  // ! TODO: CHECK THIS
+  fontWeight: "400",
   fontSize: 22,
 };
 
 export const subTitleStyle: StyleProp<TextStyle> = {
-  fontWeight: "500",
-  fontSize: 14,
+  fontWeight: "400",
+  fontSize: 16,
 };
+
+export const subTitleLgStyle: StyleProp<TextStyle> = {
+  fontWeight: "600",
+  fontSize: 18,
+};
+
 export const descriptionStyle: StyleProp<TextStyle> = {
   fontWeight: "400",
   fontSize: 14,

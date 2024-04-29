@@ -1,27 +1,9 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { AppDispatch, RootState } from "../store";
-import {
-  Complex,
-  ComplexesResponse,
-  DeleteComplexResponse,
-  PostComplexBody,
-  PostComplexResponse,
-} from "../../interfaces/complexes";
-import {
-  removeOwnerComplex,
-  setOwnerComplexes,
-  updateOwnerComplexFields,
-  updateOwnerComplexSchedules,
-} from "./ownerComplexesSlice";
-import {
-  NewFootballField,
-  PostMultipleFieldsResponse,
-} from "../../interfaces/FootballFields";
-import {
-  ComplexSchedule,
-  PostMultipleSchedulesResponse,
-} from "../../interfaces/ComplexesSchedules";
-import replayAPI from "../../api/api";
+import { RootState } from "../store";
+
+import { Complex } from "../../interfaces/complexes";
+import { FootballField } from "../../interfaces/FootballFields";
+import { ComplexSchedule } from "../../interfaces/ComplexesSchedules";
 
 // Define a type for the slice state
 export interface ComplexesState {
@@ -42,6 +24,18 @@ export const complexesSlice = createSlice({
         loading: false,
       };
     },
+    updateComplex: (state, action: PayloadAction<Complex>) => {
+      return {
+        complexes: state.complexes.map((complex) => {
+          if (complex._id === action.payload._id) {
+            return action.payload;
+          } else {
+            return { ...complex };
+          }
+        }),
+        loading: false,
+      };
+    },
     removeComplex: (state, action: PayloadAction<string>) => {
       state.complexes = state.complexes.filter(
         (complex) => complex._id !== action.payload
@@ -51,7 +45,7 @@ export const complexesSlice = createSlice({
       state,
       action: PayloadAction<{
         complexId: string;
-        footballFields: NewFootballField[];
+        footballFields: FootballField[];
       }>
     ) => {
       state.complexes = state.complexes.map((complex) => {
@@ -75,156 +69,101 @@ export const complexesSlice = createSlice({
         return complex;
       });
     },
+    updateComplexMainPicture: (
+      state,
+      action: PayloadAction<{
+        complexId: string;
+        mainPictureURL: { imageURL: string; imageKey: string };
+      }>
+    ) => {
+      state.complexes = state.complexes.map((complex) => {
+        if (complex._id === action.payload.complexId) {
+          complex.mainPictureURL = action.payload.mainPictureURL;
+        }
+        return { ...complex };
+      });
+    },
+    addComplexExtraPicturesURLs: (
+      state,
+      action: PayloadAction<{
+        complexId: string;
+        extraPicturesURLs: { imageURL: string; imageKey: string }[];
+      }>
+    ) => {
+      state.complexes = state.complexes.map((complex) => {
+        if (complex._id === action.payload.complexId) {
+          complex.extraPicturesURLs = [
+            ...(complex?.extraPicturesURLs ?? ""),
+            ...action.payload.extraPicturesURLs,
+          ];
+        }
+        return complex;
+      });
+    },
+    removeComplexExtraPicturesURLs: (
+      state,
+      action: PayloadAction<{
+        complexId: string;
+        keysToRemove: string[];
+      }>
+    ) => {
+      state.complexes = state.complexes.map((complex) => {
+        if (complex._id === action.payload.complexId) {
+          complex.extraPicturesURLs = complex.extraPicturesURLs.filter(
+            ({ imageKey }) => !action.payload.keysToRemove.includes(imageKey)
+          );
+        }
+        return complex;
+      });
+    },
+    addComplexExtraPicturesKeys: (
+      state,
+      action: PayloadAction<{
+        complexId: string;
+        extraPicturesKeys: string[];
+      }>
+    ) => {
+      state.complexes = state.complexes.map((complex) => {
+        if (complex._id === action.payload.complexId) {
+          complex.extraPicturesKeys = [
+            ...(complex?.extraPicturesKeys ?? ""),
+            ...action.payload.extraPicturesKeys,
+          ];
+        }
+        return complex;
+      });
+    },
+    removeComplexExtraPicturesKeys: (
+      state,
+      action: PayloadAction<{
+        complexId: string;
+        keysToRemove: string[];
+      }>
+    ) => {
+      state.complexes = state.complexes.map((complex) => {
+        if (complex._id === action.payload.complexId) {
+          complex.extraPicturesKeys = complex.extraPicturesKeys.filter(
+            (key) => !action.payload.keysToRemove.includes(key)
+          );
+        }
+        return complex;
+      });
+    },
   },
 });
-const {
+export const {
   setComplexes,
+  updateComplex,
   removeComplex,
   updateComplexFields,
   updateComplexSchedules,
+  updateComplexMainPicture,
+  addComplexExtraPicturesURLs,
+  removeComplexExtraPicturesURLs,
+  addComplexExtraPicturesKeys,
+  removeComplexExtraPicturesKeys,
 } = complexesSlice.actions;
 
-export const getComplexes = () => async (dispatch: AppDispatch) => {
-  try {
-    const resp = await replayAPI.get<ComplexesResponse>("/complexes");
-    dispatch(setComplexes(resp.data.complexes));
-  } catch (error) {
-    console.error({ error });
-  }
-};
-
-interface PostComplexProps {
-  body: PostComplexBody;
-  callback: (complexId: string) => void;
-}
-
-export const postComplex =
-  ({ body, callback = () => {} }: PostComplexProps) =>
-  async (dispatch: AppDispatch) => {
-    try {
-      const resp = await replayAPI.post<PostComplexResponse>(
-        "/complexes",
-        body
-      );
-      dispatch(setComplexes([resp.data.newComplex]));
-      dispatch(setOwnerComplexes([resp.data.newComplex]));
-      callback(resp.data.newComplex._id);
-    } catch (error) {
-      console.error({ error });
-    }
-  };
-
-export const deleteComplex =
-  (complexId: string, callback: () => void = () => {}) =>
-  async (dispatch: AppDispatch) => {
-    try {
-      await replayAPI.delete<DeleteComplexResponse>("/complexes", {
-        data: { complexId },
-      });
-
-      dispatch(removeComplex(complexId));
-      dispatch(removeOwnerComplex(complexId));
-      callback();
-    } catch (error) {
-      console.error({ error });
-    }
-  };
-
-interface PostFootballFieldsProps {
-  body: {
-    fieldsAmounts: {
-      five: {
-        playersAmount: number;
-        fieldsAmount: number;
-      };
-      seven: {
-        playersAmount: number;
-        fieldsAmount: number;
-      };
-      nine: {
-        playersAmount: number;
-        fieldsAmount: number;
-      };
-      eleven: {
-        playersAmount: number;
-        fieldsAmount: number;
-      };
-    };
-    complexId: string;
-  };
-  callback?: () => void;
-}
-
-export const postFootballFields =
-  ({ body, callback = () => {} }: PostFootballFieldsProps) =>
-  async (dispatch: AppDispatch) => {
-    try {
-      const resp = await replayAPI.post<PostMultipleFieldsResponse>(
-        "/football-fields/by-number",
-        body
-      );
-      dispatch(
-        updateComplexFields({
-          complexId: body.complexId,
-          footballFields: resp.data.newFootballFields,
-        })
-      );
-      dispatch(
-        updateOwnerComplexFields({
-          complexId: body.complexId,
-          footballFields: resp.data.newFootballFields,
-        })
-      );
-      callback();
-    } catch (error) {
-      console.error({ error });
-    }
-  };
-
-export interface ScheduleParsed {
-  openingTime: string;
-  closingTime: string;
-  weekDays: number[];
-  sport: string;
-}
-
-interface PostComplexSchedulesProps {
-  body: {
-    schedules: ScheduleParsed[];
-    complexId: string;
-  };
-  callback?: () => void;
-}
-
-export const postComplexSchedules =
-  ({ body, callback = () => {} }: PostComplexSchedulesProps) =>
-  async (dispatch: AppDispatch) => {
-    try {
-      const resp = await replayAPI.post<PostMultipleSchedulesResponse>(
-        "/complexes-schedules/multiple",
-        body
-      );
-      dispatch(
-        updateComplexSchedules({
-          complexId: body.complexId,
-          complexSchedules: resp.data.newComplexSchedules,
-        })
-      );
-      dispatch(
-        updateOwnerComplexSchedules({
-          complexId: body.complexId,
-          complexSchedules: resp.data.newComplexSchedules,
-        })
-      );
-      callback();
-    } catch (error) {
-      console.error({ error });
-    }
-  };
-
 export const selectComplexes = (state: RootState) => state.complexes;
-
-// Action creators are generated for each case reducer function
-export const {} = complexesSlice.actions;
 
 export default complexesSlice.reducer;

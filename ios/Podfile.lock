@@ -549,6 +549,8 @@ PODS:
     - React-Core
   - RNGestureHandler (2.12.0):
     - React-Core
+  - RNImageColors (1.5.2):
+    - React-Core
   - RNPermissions (3.9.3):
     - React-Core
   - RNScreens (3.23.0):
@@ -644,6 +646,7 @@ DEPENDENCIES:
   - "RNCCheckbox (from `../node_modules/@react-native-community/checkbox`)"
   - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNImageColors (from `../node_modules/react-native-image-colors`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -782,6 +785,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-picker/picker"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNImageColors:
+    :path: "../node_modules/react-native-image-colors"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
   RNScreens:
@@ -868,6 +873,7 @@ SPEC CHECKSUMS:
   RNCCheckbox: 75255b03e604bbcc26411eb31c4cbe3e3865f538
   RNCPicker: 0bc2f0a29abcca7b7ed44a2d036aac9ab6d25700
   RNGestureHandler: dec4645026e7401a0899f2846d864403478ff6a5
+  RNImageColors: 9ac05083b52d5c350e6972650ae3ba0e556466c1
   RNPermissions: d355863994930e56252b79d055879b997d8a998a
   RNScreens: 6a8a3c6b808aa48dca1780df7b73ea524f602c63
   RNShare: 32e97adc8d8c97d4a26bcdd3c45516882184f8b6

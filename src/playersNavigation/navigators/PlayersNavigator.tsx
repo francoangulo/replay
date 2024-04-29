@@ -4,15 +4,13 @@ import IonIcon from "react-native-vector-icons/Ionicons";
 import { colors } from "../../theme/appTheme";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { ActivityIndicator } from "react-native";
-import {
-  getComplexes,
-  selectComplexes,
-} from "../../redux/slices/complexesSlice";
+import { selectComplexes } from "../../redux/slices/complexesSlice";
 import { SettingsScreenPlayers } from "../screens/SettingsScreenPlayers";
 import { HomeNavigatorPlayers } from "./HomeNavigatorPlayers";
 import { getAllTurns, selectTurns } from "../../redux/slices/turnsSlice";
 import { SearchNavigatorPlayers } from "./SearchNavigatorPlayers";
 import { MapsNavigatorPlayers } from "./MapsNavigatorPlayer";
+import { getComplexes } from "../../redux/actions/complexes";
 
 const Tab = createBottomTabNavigator();
 

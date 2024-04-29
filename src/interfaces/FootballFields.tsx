@@ -15,11 +15,3 @@ export interface FootballField {
 export interface PostMultipleFieldsResponse {
   newFootballFields: NewFootballField[];
 }
-
-export interface NewFootballField {
-  _id: string;
-  fieldNumber: number;
-  complexId: string;
-  updatedAt: string;
-  createdAt: string;
-}

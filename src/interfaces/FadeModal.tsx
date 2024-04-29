@@ -1,6 +1,6 @@
 export interface FadeModalState {
   visible: boolean;
-  status: string;
+  status?: string;
   complexId?: string;
   autoDismiss: boolean;
 }

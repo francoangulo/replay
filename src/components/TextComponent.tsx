@@ -1,9 +1,14 @@
 import React from "react";
 import { StyleProp, Text, TextStyle } from "react-native";
-import { descriptionStyle, subTitleStyle, titleStyle } from "../theme/appTheme";
+import {
+  descriptionStyle,
+  subTitleLgStyle,
+  subTitleStyle,
+  titleStyle,
+} from "../theme/appTheme";
 interface Props {
   children: string | string[];
-  type: "title" | "subtitle" | "text";
+  type: "title" | "subtitle" | "subtitleLg" | "text";
   customStyles?: StyleProp<TextStyle>;
 }
 export const TextComponent = ({ children, type, customStyles }: Props) => {
@@ -12,8 +17,15 @@ export const TextComponent = ({ children, type, customStyles }: Props) => {
       ? titleStyle
       : type === "subtitle"
       ? subTitleStyle
+      : type === "subtitleLg"
+      ? subTitleLgStyle
       : descriptionStyle;
 
-  const combinedStyles = [style, customStyles];
+  const combinedStyles: StyleProp<TextStyle>[] = [
+    style,
+    customStyles,
+    { fontFamily: "OpenSans" },
+    { fontFamily: "Roboto" },
+  ];
   return <Text style={combinedStyles!}>{children}</Text>;
 };

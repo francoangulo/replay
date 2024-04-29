@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Complex } from "../../interfaces/complexes";
 import { colors } from "../../theme/appTheme";
 import { DateTime } from "luxon";
+import { useComplexMainPicture } from "../../hooks/useComplexMainPicture";
 
 const weekdaysReference = ["L", "M", "M", "J", "V", "S", "D"];
 
@@ -14,6 +15,11 @@ interface BannerProps {
 
 export const ComplexBanner = ({ complex }: BannerProps) => {
   const { top } = useSafeAreaInsets();
+
+  const { complexMainPicture } = useComplexMainPicture({
+    complexId: complex._id,
+    mainPictureKey: complex.mainPictureKey,
+  });
 
   return (
     <>
@@ -52,7 +58,7 @@ export const ComplexBanner = ({ complex }: BannerProps) => {
 
       <Image
         source={{
-          uri: "https://beneficios.lacapital.com.ar/media/cache/16/00/160057f1cc2bf346e91e1475fb3dc0af.jpg",
+          uri: complexMainPicture,
         }}
         style={styles.bannerImage}
       />

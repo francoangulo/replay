@@ -19,7 +19,6 @@ import ViewShot from "react-native-view-shot";
 import Share from "react-native-share";
 import QRCode from "react-native-qrcode-svg";
 import { CommonActions } from "@react-navigation/native";
-import { selectOwnerComplexes } from "../../redux/slices/ownerComplexesSlice";
 import { ViewLocationButton } from "../components/ViewLocationButton";
 import { ConfirmTurnButton } from "../components/ConfirmTurnButton";
 import { TurnCardRow } from "../components/TurnCardRow";
@@ -27,14 +26,15 @@ import { ShareButton } from "../components/ShareButton";
 import { FadeModal } from "../../ownersNavigation/components/FadeModal";
 import { FadeModalState } from "../../interfaces/FadeModal";
 import { ConfirmedTurnModalContent } from "../components/ConfirmedTurnModalContent";
+import { selectComplexes } from "../../redux/slices/complexesSlice";
 
 type Props = StackScreenProps<HomeStackParamList, "TurnScreen">;
 
 export const TurnScreen = ({ navigation, route }: Props) => {
   const turn: Turn = route?.params?.turn ?? false;
   const user = useAppSelector(selectAuth);
-  const { ownerComplexes } = useAppSelector(selectOwnerComplexes);
-  const complex = ownerComplexes.find(
+  const { complexes } = useAppSelector(selectComplexes);
+  const complex = complexes.find(
     (ownerComplex) => ownerComplex._id === turn.complexId
   );
   const userType = user?.userType;

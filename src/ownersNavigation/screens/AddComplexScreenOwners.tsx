@@ -15,7 +15,7 @@ import { cardStyle, colors } from "../../theme/appTheme";
 import { TextComponent } from "../../components/TextComponent";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import ADIcon from "react-native-vector-icons/AntDesign";
-import { launchImageLibrary } from "react-native-image-picker";
+import { Asset, launchImageLibrary } from "react-native-image-picker";
 import { ProfileStackParamList } from "../navigators/ProfileNavigatorOwners";
 import { FormInput } from "../components/FormInput";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
@@ -23,6 +23,7 @@ import { postComplex } from "../../redux/slices/complexesSlice";
 import { selectAuth } from "../../redux/slices/authSlice";
 import { FadeModal } from "../components/FadeModal";
 import { FadeModalState } from "../../interfaces/FadeModal";
+import { buildImageObjectToUpload } from "../../utils/utils";
 
 type Props = StackScreenProps<ProfileStackParamList, "AddComplexScreen">;
 interface FormErrors {
@@ -44,16 +45,21 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
   });
 
   useEffect(() => {
-    if (modalState.visible === false && modalState.status === "success") {
+    if (
+      modalState.visible === false &&
+      modalState.status === "success" &&
+      modalState.complexId
+    ) {
       navigation.replace("AddFieldsScreen", {
         complexId: modalState.complexId,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalState]);
 
   const [complexName, setComplexName] = useState<string>("");
   const [complexAddress, setComplexAddress] = useState<string>("");
-  const [complexPicture, setComplexPicture] = useState<string>("");
+  const [complexPicture, setComplexPicture] = useState<Asset>({});
   const [errors, setErrors] = useState<FormErrors>({
     complexName: "",
     complexAddress: "",
@@ -67,7 +73,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
     const result = await launchImageLibrary({ mediaType: "photo" });
     result?.assets &&
       result?.assets[0].uri &&
-      setComplexPicture(result.assets[0].uri);
+      setComplexPicture(result.assets[0]);
   };
 
   const checkErrors = (): FormErrors => {
@@ -77,27 +83,34 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
       complexPicture: "",
       complexCoordinate: "",
     };
-    if (!complexName.length)
+    if (!complexName.length) {
       errors.complexName = "Por favor ingresa el nombre del complejo";
-    if (complexName.length < 3)
+    }
+    if (complexName.length < 3) {
       errors.complexName = "Por favor ingresa un nombre válido";
+    }
 
-    if (!complexAddress.length)
+    if (!complexAddress.length) {
       errors.complexAddress = "Por favor ingresa la dirección del complejo";
-    if (complexAddress.length < 6)
+    }
+    if (complexAddress.length < 6) {
       errors.complexAddress = "Por favor ingresa una dirección válida";
+    }
 
-    if (!complexPicture.length)
+    if (!Object.keys(complexPicture).length) {
       errors.complexPicture = "Por favor agreaga una foto del complejo";
-    if (!complexCoordinate)
+    }
+    if (!complexCoordinate) {
       errors.complexCoordinate = "Por favor selecciona la ubicación en el mapa";
-    if (!complexCoordinate?.latitude || !complexCoordinate.longitude)
+    }
+    if (!complexCoordinate?.latitude || !complexCoordinate.longitude) {
       errors.complexCoordinate = "Por favor selecciona la ubicación en el mapa";
+    }
     setErrors(errors);
     return errors;
   };
 
-  const goNextStep = () => {
+  const goNextStep = async () => {
     if (false) {
       setModalState({
         visible: true,
@@ -114,6 +127,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
       ) {
         return;
       }
+      const imageBody = await buildImageObjectToUpload(complexPicture);
       dispatch(
         postComplex({
           body: {
@@ -122,7 +136,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
             latitude: complexCoordinate.latitude, // ! TODO
             longitude: complexCoordinate.longitude, // ! TODO
             ownerId,
-            //     complexPicture, // ! TODO
+            complexPicture: imageBody, // ! TODO
           },
           callback: (complexId) =>
             setModalState({
@@ -207,7 +221,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
                   </Text>
                 </View>
               </View>
-              {complexPicture.length > 0 ? (
+              {complexPicture?.uri?.length ?? 0 > 0 ? (
                 <TouchableOpacity
                   style={{
                     width: windowWidth - 32,
@@ -218,7 +232,7 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
                   onPress={selectPicture}
                 >
                   <Image
-                    source={{ uri: complexPicture }}
+                    source={{ uri: complexPicture.uri }}
                     style={{ width: "100%", height: "100%", borderRadius: 16 }}
                   />
                 </TouchableOpacity>

@@ -8,6 +8,7 @@ import {
   request,
 } from "react-native-permissions";
 import { Complex } from "../interfaces/complexes";
+import { Asset } from "react-native-image-picker";
 
 /**
  * Generates a random pastel color based on the given number.
@@ -258,4 +259,31 @@ export const minutesToHours = (minute: 60 | 90 | 120) => {
   const hour = Math.trunc(minute / 60);
   const minutes = minute % 60;
   return { hour, minutes };
+};
+
+export interface BuiltImage {
+  uri: string;
+  type: string;
+  name: string;
+}
+
+export const buildImageObjectToUpload = (image: Asset): BuiltImage | false => {
+  let name = image?.fileName;
+  const uri = Platform.select({
+    ios: image?.uri?.replace("file://", ""),
+    android: image?.uri,
+  });
+  const type = image?.type;
+  //   if (!name) {
+  //     name = path.parse(uri).base;
+  //   }
+  if (uri && type && name) {
+    return {
+      uri,
+      type,
+      name,
+    };
+  } else {
+    return false;
+  }
 };
