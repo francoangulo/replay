@@ -6,10 +6,14 @@ import {
   TouchableOpacity,
   ViewStyle,
 } from "react-native";
-import { colors } from "../theme/appTheme";
+import {
+  GenericButtonStyles,
+  genericButtonStyles,
+  genericButtonTextStyles,
+} from "../theme/appTheme";
 
 interface Props {
-  buttonType: "primary" | "secondary";
+  buttonType: keyof GenericButtonStyles;
   onButtonPress: () => void;
   buttonText: string;
   rightIcon?: () => React.ReactNode;
@@ -23,21 +27,16 @@ export const GenericButton = ({
   rightIcon,
   customButtonStyle,
 }: Props) => {
-  const buttonBaseStyle =
-    buttonType === "primary" ? styles.primaryButton : styles.secondaryButton;
-
-  const buttonFinalStyle = [buttonBaseStyle, customButtonStyle];
-  const buttonTextBaseStyle =
-    buttonType === "primary"
-      ? styles.primaryButtonText
-      : styles.secondaryButtonText;
+  const buttonFinalStyle = [genericButtonStyles[buttonType], customButtonStyle];
 
   return (
     <TouchableOpacity
       style={[styles.genericButton, ...buttonFinalStyle]}
       onPress={onButtonPress}
     >
-      <Text style={{ ...styles.genericButtonText, ...buttonTextBaseStyle }}>
+      <Text
+        style={[styles.genericButtonText, genericButtonTextStyles[buttonType]]}
+      >
         {buttonText}
       </Text>
       {rightIcon && rightIcon()}
@@ -48,25 +47,14 @@ const styles = StyleSheet.create({
   genericButton: {
     width: "100%",
     padding: 8,
-    borderRadius: 5,
+    borderRadius: 12,
     marginTop: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-  },
-  primaryButton: {
-    backgroundColor: colors.primary,
-  },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   genericButtonText: { fontWeight: "bold" },
-  primaryButtonText: { color: "#ffffff" },
-  secondaryButtonText: {
-    color: colors.primary,
-    borderWidth: 0,
-    borderColor: "transparent",
-  },
 });

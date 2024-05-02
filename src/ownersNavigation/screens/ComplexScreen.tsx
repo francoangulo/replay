@@ -54,11 +54,6 @@ export const ComplexScreen = ({ route, navigation }: ScreenProps) => {
     mainPictureKey: complex.mainPictureKey,
   });
 
-  console.log(
-    "franco main picture --> ",
-    JSON.stringify(complexMainPicture, null, 4)
-  );
-
   const getImagePrimaryColor = async () => {
     const colorsResult: ImageColorsResult = await ImageColors.getColors(
       complexMainPicture,
@@ -109,7 +104,7 @@ export const ComplexScreen = ({ route, navigation }: ScreenProps) => {
           </View>
           <View style={styles.rowContainer}>
             <RowCard
-              amount={complex.FootballFields.length}
+              amount={complex?.FootballFields?.length || 0}
               imageColor={imageColor}
               text="Cancha"
               Icon={
@@ -121,7 +116,7 @@ export const ComplexScreen = ({ route, navigation }: ScreenProps) => {
               }
             />
             <RowCard
-              amount={complex.ComplexSchedules.length}
+              amount={complex?.ComplexSchedules?.length || 0}
               imageColor={imageColor}
               text="Horario"
               Icon={
@@ -130,6 +125,11 @@ export const ComplexScreen = ({ route, navigation }: ScreenProps) => {
                   color={imageColor || colors.primary}
                   size={40}
                 />
+              }
+              onPress={() =>
+                navigation.navigate("SchedulesScreen", {
+                  complexId: complex._id,
+                })
               }
             />
             <RowCard
@@ -154,11 +154,10 @@ export const ComplexScreen = ({ route, navigation }: ScreenProps) => {
         <View style={styles.footer}>
           <GenericButton
             buttonText="Remove"
-            buttonType="primary"
+            buttonType="danger"
             onButtonPress={() =>
               dispatch(deleteComplex(complex._id, navigation.pop))
             }
-            customButtonStyle={styles.removeButton}
           />
         </View>
       </ScrollView>
@@ -191,13 +190,6 @@ const styles = StyleSheet.create({
     zIndex: -1,
     opacity: 0.5,
     right: 0,
-  },
-  removeButton: {
-    backgroundColor: colors.danger,
-    padding: 16,
-    borderRadius: 12,
-    width: "100%",
-    alignItems: "center",
   },
   footer: {
     justifyContent: "center",

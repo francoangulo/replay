@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { useState } from "react";
+import { ComplexSchedule } from "../interfaces/ComplexesSchedules";
 
 export interface EditingState {
   scheduleIdx: number;
@@ -26,9 +27,34 @@ const initialState: ScheduleState[] = [
   },
 ];
 
-export const useAddFields = () => {
-  const [footballSchedules, setFootballSchedules] =
-    useState<ScheduleState[]>(initialState);
+const parseExistingSchedules = (
+  existingSchedules: ComplexSchedule[]
+): ScheduleState[] => {
+  return existingSchedules.map(({ weekDays, openingTime, closingTime }) => {
+    const [openingHour, openingMinute] = openingTime.split(":");
+    const [closingHour, closingMinute] = closingTime.split(":");
+    return {
+      openingHour,
+      openingMinute,
+      closingHour,
+      closingMinute,
+      weekDays,
+      sport: "football",
+    };
+  });
+};
+
+interface HookProps {
+  existingSchedules?: ComplexSchedule[];
+}
+
+export const useAddFields = ({ existingSchedules }: HookProps) => {
+  const parsedExistingSchedules = existingSchedules
+    ? parseExistingSchedules(existingSchedules)
+    : undefined;
+  const [footballSchedules, setFootballSchedules] = useState<ScheduleState[]>(
+    parsedExistingSchedules || initialState
+  );
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -64,17 +90,34 @@ export const useAddFields = () => {
   };
 
   const checkScheduleOverlapping = (
-    date: Date,
+    date: Date, // This is a JS date format because the picker needs that format
     scheduleIdx: number
   ): boolean => {
-    const newDateHours = Number(String(date.getHours()).padStart(2, "0"));
-    const newDateMinutes = Number(String(date.getMinutes()).padEnd(2, "0"));
+    // the hours from the date we want to check
+    const newDateHours = date.getHours();
+    // the minutes from the date we want to check
+    const newDateMinutes = date.getMinutes();
+    const newDate = DateTime.fromObject({
+      hour: newDateHours,
+      minute: newDateMinutes,
+    });
     const overlaps = footballSchedules.some(
       (
         { openingHour, openingMinute, closingHour, closingMinute, weekDays },
         idx
       ) => {
         if (scheduleIdx !== idx) {
+          // nos manejamos con horas y minutos en lugar de fechas porque la fecha es
+          // solo de un día en particular... las horas y los minutos son genéricos
+
+          const openingDate = DateTime.fromObject({
+            hour: Number(openingHour),
+            minute: Number(openingMinute),
+          });
+          const closingDate = DateTime.fromObject({
+            hour: Number(closingHour),
+            minute: Number(closingMinute),
+          });
           const numberOpeningHour = Number(openingHour);
           const numberOpeningMinute = Number(openingMinute);
           const numberClosingHour = Number(closingHour);
@@ -160,7 +203,9 @@ export const useAddFields = () => {
     const newFootballSchedulesState = [...footballSchedules];
     const { editingSchedule, scheduleIdx } = editing;
     const overlaps = checkScheduleOverlapping(date, scheduleIdx);
-    if (overlaps) return;
+    if (overlaps) {
+      return;
+    }
     // we can do this cause this type of variables are those ones that are passed by reference
     const currentSchedule = newFootballSchedulesState[scheduleIdx];
     const newDateHours = String(date.getHours()).padStart(2, "0");
@@ -181,10 +226,12 @@ export const useAddFields = () => {
       currentSchedule.openingHour = newDateHours;
       currentSchedule.openingMinute = newDateMinutes;
 
-      if (scheduleError.scheduleType === "opening")
+      if (scheduleError.scheduleType === "opening") {
         setScheduleError({ ...scheduleError, scheduleType: "" });
-      if (scheduleError.scheduleType === "both")
+      }
+      if (scheduleError.scheduleType === "both") {
         setScheduleError({ ...scheduleError, scheduleType: "closing" });
+      }
     } else {
       if (
         currentSchedule.openingHour !== "XX" &&
@@ -202,10 +249,12 @@ export const useAddFields = () => {
 
       currentSchedule.closingHour = newDateHours;
       currentSchedule.closingMinute = newDateMinutes;
-      if (scheduleError.scheduleType === "closing")
+      if (scheduleError.scheduleType === "closing") {
         setScheduleError({ ...scheduleError, scheduleType: "" });
-      if (scheduleError.scheduleType === "both")
+      }
+      if (scheduleError.scheduleType === "both") {
         setScheduleError({ ...scheduleError, scheduleType: "opening" });
+      }
     }
     setModalVisible(false);
     setCurrentPickingError("");
@@ -218,22 +267,26 @@ export const useAddFields = () => {
     dayValue: boolean
   ) => {
     const newFootballSchedulesState = [...footballSchedules];
-    if (dayValue) newFootballSchedulesState[scheduleIdx].weekDays.push(dayIdx);
-    else
+    if (dayValue) {
+      newFootballSchedulesState[scheduleIdx].weekDays.push(dayIdx);
+    } else {
       newFootballSchedulesState[scheduleIdx].weekDays =
         newFootballSchedulesState[scheduleIdx].weekDays.filter(
           (day) => day !== dayIdx
         );
+    }
     newFootballSchedulesState[scheduleIdx].weekDays.sort();
     setFootballSchedules;
   };
 
-  const onEditing = (editing: EditingState) => {
-    setEditing(editing);
+  const onEditing = (newEditing: EditingState) => {
+    setEditing(newEditing);
   };
 
   const deleteSchedule = (scheduleIdx: number) => {
-    if (footballSchedules.length === 1) return;
+    if (footballSchedules.length === 1) {
+      return;
+    }
     const spliceSchedulesState = [...footballSchedules];
     spliceSchedulesState.splice(scheduleIdx, 1);
     setFootballSchedules([...spliceSchedulesState]);
@@ -252,7 +305,9 @@ export const useAddFields = () => {
     );
     overlapingIdx = footballSchedules.findIndex(
       ({ openingHour, openingMinute, closingHour, closingMinute }, idx) => {
-        if (emptyIdx > -1) return -1;
+        if (emptyIdx > -1) {
+          return -1;
+        }
         return (
           checkScheduleOverlapping(
             DateTime.fromObject({

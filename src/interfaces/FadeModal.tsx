@@ -1,8 +1,8 @@
 export interface FadeModalState {
-  visible: boolean;
-  status?: string;
-  complexId?: string;
   autoDismiss: boolean;
+  complexId?: string;
+  status?: string;
+  visible: boolean;
 }
 
 export type SetModalState = React.Dispatch<

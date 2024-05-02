@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Text,
-  TouchableOpacity,
-  View,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { TouchableOpacity, View, StyleSheet, ScrollView } from "react-native";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { StackScreenProps } from "@react-navigation/stack";
 import { ProfileStackParamList } from "../navigators/ProfileNavigatorOwners";
@@ -14,13 +8,19 @@ import { useAddFields } from "../../hooks/useAddFields";
 import { TimePickerModal } from "../components/TimePickerModal";
 import { ScheduleCard } from "../components/ScheduleCard";
 import { useAppDispatch } from "../../hooks/redux";
-import {
-  postComplexSchedules,
-  postFootballFields,
-} from "../../redux/slices/complexesSlice";
 import ADIcon from "react-native-vector-icons/AntDesign";
 import { FadeModal } from "../components/FadeModal";
 import { FieldsAmountSelector } from "../components/FieldsAmountSelector";
+import {
+  postComplexSchedules,
+  postFootballFields,
+} from "../../redux/actions/complexes";
+import { TextComponent } from "../../components/TextComponent";
+import { GenericButton } from "../../components/GenericButton";
+import { FieldsAddSuccess } from "../components/ModalsBodies/FieldsAddSuccess";
+import { FieldsAddLoading } from "../components/ModalsBodies/FieldsAddLoading";
+import { FieldsAddError } from "../components/ModalsBodies/FieldsAddError";
+import { FadeModalState } from "../../interfaces/FadeModal";
 
 type Props = StackScreenProps<ProfileStackParamList, "AddFieldsScreen">;
 
@@ -41,7 +41,7 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
     onEditing,
     scheduleError,
     onWeekDaysChange,
-  } = useAddFields();
+  } = useAddFields({});
 
   const dispatch = useAppDispatch();
 
@@ -51,7 +51,7 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
     nine: { playersAmount: 9, fieldsAmount: 0 },
     eleven: { playersAmount: 11, fieldsAmount: 0 },
   });
-  const [modalState, setModalState] = useState({
+  const [modalState, setModalState] = useState<FadeModalState>({
     visible: false,
     status: "",
     autoDismiss: true,
@@ -71,7 +71,9 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
       setModalState({ visible: true, status: "success", autoDismiss: true });
     } else {
       const errors = schedulesHaveErrors();
-      if (errors) return;
+      if (errors) {
+        return;
+      }
       setModalState({ visible: true, status: "loading", autoDismiss: false });
       dispatch(
         postFootballFields({ body: { fieldsAmounts: fieldsState, complexId } })
@@ -108,70 +110,46 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.screenContainer}>
       <ScreenHeader
         title="Canchas y horarios"
         navigation={navigation}
         route={route}
       />
-      <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
-        <View style={{ padding: 16, gap: 8 }}>
-          <Text
-            style={{ fontSize: 18, textAlign: "center", fontWeight: "bold" }}
-          >
-            Cantidad de canchas
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              padding: 16,
-              ...(cardStyle as Object),
-            }}
-          >
-            <View style={{ flex: 1, alignItems: "center" }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-evenly",
-                  width: "100%",
-                }}
-              >
-                <FieldsAmountSelector
-                  playersAmount={5}
-                  fieldsState={fieldsState}
-                  playersAmountString={"five"}
-                  setFieldsState={setFieldsState}
-                />
-                <FieldsAmountSelector
-                  playersAmount={7}
-                  fieldsState={fieldsState}
-                  playersAmountString={"seven"}
-                  setFieldsState={setFieldsState}
-                />
-                <FieldsAmountSelector
-                  playersAmount={9}
-                  fieldsState={fieldsState}
-                  playersAmountString={"nine"}
-                  setFieldsState={setFieldsState}
-                />
-                <FieldsAmountSelector
-                  playersAmount={11}
-                  fieldsState={fieldsState}
-                  playersAmountString={"eleven"}
-                  setFieldsState={setFieldsState}
-                />
-              </View>
-            </View>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.inputsCardsContainers}>
+          <TextComponent type="subtitleLg" children={"Cantidad de canchas"} />
+
+          <View style={[cardStyle, styles.fieldsAmountsCard]}>
+            <FieldsAmountSelector
+              playersAmount={5}
+              fieldsState={fieldsState}
+              playersAmountString={"five"}
+              setFieldsState={setFieldsState}
+            />
+            <FieldsAmountSelector
+              playersAmount={7}
+              fieldsState={fieldsState}
+              playersAmountString={"seven"}
+              setFieldsState={setFieldsState}
+            />
+            <FieldsAmountSelector
+              playersAmount={9}
+              fieldsState={fieldsState}
+              playersAmountString={"nine"}
+              setFieldsState={setFieldsState}
+            />
+            <FieldsAmountSelector
+              playersAmount={11}
+              fieldsState={fieldsState}
+              playersAmountString={"eleven"}
+              setFieldsState={setFieldsState}
+            />
           </View>
         </View>
-        <View>
-          <Text
-            style={{ fontSize: 18, textAlign: "center", fontWeight: "bold" }}
-          >
-            Horarios
-          </Text>
-          <View style={{ flex: 1, alignItems: "center", padding: 16, gap: 16 }}>
+        <View style={styles.inputsCardsContainers}>
+          <TextComponent type="subtitleLg" children={"Horarios"} />
+          <View style={styles.schedulesCard}>
             {footballSchedules.map((schedule, scheduleIdx) => (
               <ScheduleCard
                 key={`schedule-card-${scheduleIdx}`}
@@ -186,18 +164,7 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
               />
             ))}
             <TouchableOpacity
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: 8,
-                borderWidth: 1,
-                //     borderColor: colors.primary,
-                borderColor: "#00000044",
-                width: "100%",
-                borderRadius: 5,
-                borderStyle: "dashed",
-              }}
+              style={styles.dashedButton}
               onPress={addFootballSchedule}
             >
               <ADIcon name="plus" size={24} color={colors.primary} />
@@ -206,27 +173,18 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
         </View>
       </ScrollView>
       <View style={styles.footerButtonsWrapper}>
-        <TouchableOpacity
-          style={styles.footerCancelButton}
-          onPress={() => navigation.pop()}
-        >
-          <Text
-            style={{
-              fontWeight: "bold",
-              color: colors.danger,
-            }}
-          >
-            Cancelar
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.footerFinishButton}
-          onPress={() => submitComplex()}
-        >
-          <Text style={{ fontWeight: "bold", color: colors.appBg }}>
-            Finalizar
-          </Text>
-        </TouchableOpacity>
+        <GenericButton
+          buttonText="Cancelar"
+          buttonType="dangerNoBg"
+          onButtonPress={() => navigation.pop()}
+          customButtonStyle={styles.footerCancelButton}
+        />
+        <GenericButton
+          buttonText="Finalizar"
+          buttonType="primary"
+          onButtonPress={() => submitComplex()}
+          customButtonStyle={styles.footerFinishButton}
+        />
       </View>
       <TimePickerModal
         currentPickingDate={currentPickingDate}
@@ -241,57 +199,21 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
       <FadeModal
         modalState={modalState}
         setModalState={setModalState}
-        modalContent={() => {
-          return (
-            <View>
-              {modalState.status === "error" ? (
-                <View
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    rowGap: 8,
-                  }}
-                >
-                  <Text style={{ fontSize: 40 }}>❗️</Text>
-                  <Text style={{ fontSize: 20 }}>Se produjo un error</Text>
-                  <Text style={{ fontSize: 16, textAlign: "center" }}>
-                    Si el problema persiste, contacta un administrador
-                  </Text>
-                </View>
-              ) : modalState.status === "loading" ? (
-                <View
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    rowGap: 8,
-                  }}
-                >
-                  <Text style={{ fontSize: 40 }}>⏳</Text>
-                  <Text style={{ fontSize: 20 }}>Añadiendo canchas...</Text>
-                </View>
-              ) : (
-                <View
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    rowGap: 8,
-                  }}
-                >
-                  <Text style={{ fontSize: 40 }}>✅</Text>
-                  <Text style={{ fontSize: 20 }}>
-                    Canchas agregadas con éxito!
-                  </Text>
-                </View>
-              )}
-            </View>
-          );
-        }}
+        modalContent={
+          modalState.status === "error"
+            ? FieldsAddError
+            : modalState.status === "loading"
+            ? FieldsAddLoading
+            : FieldsAddSuccess
+        }
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollViewContent: { paddingBottom: 60 },
+  screenContainer: { flex: 1 },
   addFieldButton: {
     borderWidth: 1,
     borderColor: colors.primary,
@@ -331,16 +253,26 @@ const styles = StyleSheet.create({
   },
   footerCancelButton: {
     flex: 0.75,
-    justifyContent: "center",
-    alignItems: "center",
   },
   footerFinishButton: {
     flex: 1.25,
-    backgroundColor: colors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 4,
-    justifyContent: "center",
+  },
+  inputsCardsContainers: { padding: 16, gap: 8 },
+  fieldsAmountsCard: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    padding: 16,
+  },
+  schedulesCard: { flex: 1, alignItems: "center", gap: 16 },
+  dashedButton: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    padding: 8,
+    borderWidth: 1,
+    borderColor: "#00000044",
+    width: "100%",
+    borderRadius: 5,
+    borderStyle: "dashed",
   },
 });

@@ -19,11 +19,11 @@ import { Asset, launchImageLibrary } from "react-native-image-picker";
 import { ProfileStackParamList } from "../navigators/ProfileNavigatorOwners";
 import { FormInput } from "../components/FormInput";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
-import { postComplex } from "../../redux/slices/complexesSlice";
 import { selectAuth } from "../../redux/slices/authSlice";
 import { FadeModal } from "../components/FadeModal";
 import { FadeModalState } from "../../interfaces/FadeModal";
 import { buildImageObjectToUpload } from "../../utils/utils";
+import { postComplex } from "../../redux/actions/complexes";
 
 type Props = StackScreenProps<ProfileStackParamList, "AddComplexScreen">;
 interface FormErrors {

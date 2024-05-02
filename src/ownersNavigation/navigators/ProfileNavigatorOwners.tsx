@@ -9,6 +9,7 @@ import { AddComplexScreenOwners } from "../screens/AddComplexScreenOwners";
 import { SelectLocationScreen } from "../screens/SelectLocationScreen";
 import { AddFieldsScreen } from "../screens/AddFieldsScreen";
 import { PicturesScreen } from "../screens/PicturesScreen";
+import { SchedulesScreen } from "../screens/SchedulesScreen";
 
 interface Coordinate {
   latitude: number;
@@ -27,6 +28,7 @@ export type ProfileStackParamList = {
   AddFieldsScreen: { complexId: string };
   ComplexScreen: { complex: Complex };
   PicturesScreen: { complexId: string };
+  SchedulesScreen: { complexId: string };
 };
 
 const Stack = createStackNavigator<ProfileStackParamList>();
@@ -61,6 +63,10 @@ const screens = [
   {
     name: "PicturesScreen",
     component: PicturesScreen,
+  },
+  {
+    name: "SchedulesScreen",
+    component: SchedulesScreen,
   },
 ];
 

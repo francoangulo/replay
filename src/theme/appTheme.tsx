@@ -109,3 +109,55 @@ export const calendarProviderTheme: Theme = {
 };
 
 export const calendarProviderStyles: StyleProp<any> = { flex: 1 };
+
+export interface GenericButtonStyles {
+  primary: StyleProp<ViewStyle>;
+  secondary: StyleProp<ViewStyle>;
+  danger: StyleProp<ViewStyle>;
+  dangerNoBg: StyleProp<ViewStyle>;
+}
+
+export const genericButtonStyles: GenericButtonStyles = {
+  primary: {
+    backgroundColor: colors.primary,
+  },
+  secondary: { borderWidth: 1, borderColor: colors.primary },
+  danger: {
+    backgroundColor: colors.danger,
+  },
+  dangerNoBg: {},
+};
+
+interface GenericButtonTextStyles {
+  primary: StyleProp<TextStyle>;
+  secondary: StyleProp<TextStyle>;
+  danger: StyleProp<TextStyle>;
+  dangerNoBg: StyleProp<TextStyle>;
+}
+
+export const genericButtonTextStyles: GenericButtonTextStyles = {
+  primary: { color: "#ffffff" },
+  secondary: {
+    color: colors.primary,
+    borderWidth: 0,
+    borderColor: "transparent",
+  },
+  danger: {
+    color: colors.appBg,
+  },
+  dangerNoBg: { color: colors.danger },
+};
+
+interface TextComponentStyles {
+  title: StyleProp<TextStyle>;
+  subtitle: StyleProp<TextStyle>;
+  subtitleLg: StyleProp<TextStyle>;
+  text: StyleProp<TextStyle>;
+}
+
+export const textComponentStyles: TextComponentStyles = {
+  title: titleStyle,
+  subtitle: subTitleStyle,
+  subtitleLg: subTitleLgStyle,
+  text: descriptionStyle,
+};
