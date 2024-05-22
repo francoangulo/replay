@@ -2,7 +2,6 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { ComplexScreen } from "../screens/ComplexScreen";
 import { colors } from "../../theme/appTheme";
-import { Complex } from "../../interfaces/complexes";
 import { ProfileScreenOwners } from "../screens/ProfileScreenOwners";
 import { AdminComplexesScreenOwner } from "../screens/AdminComplexesScreenOwner";
 import { AddComplexScreenOwners } from "../screens/AddComplexScreenOwners";
@@ -26,7 +25,7 @@ export type ProfileStackParamList = {
     complexCoordinate?: Coordinate;
   };
   AddFieldsScreen: { complexId: string };
-  ComplexScreen: { complex: Complex };
+  ComplexScreen: { complexId: string };
   PicturesScreen: { complexId: string };
   SchedulesScreen: { complexId: string };
 };

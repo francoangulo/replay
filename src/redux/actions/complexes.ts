@@ -8,7 +8,11 @@ import {
   PostComplexResponse,
   PutComplexResponse,
 } from "../../interfaces/complexes";
-import { PostMultipleSchedulesResponse } from "../../interfaces/ComplexesSchedules";
+import {
+  DeleteScheduleResponse,
+  PostMultipleSchedulesResponse,
+  PutMultipleSchedulesResponse,
+} from "../../interfaces/ComplexesSchedules";
 import { PostMultipleFieldsResponse } from "../../interfaces/FootballFields";
 import { BuiltImage } from "../../utils/utils";
 import {
@@ -21,6 +25,7 @@ import {
   updateComplexSchedules,
   removeComplexExtraPicturesKeys,
   removeComplexExtraPicturesURLs,
+  removeComplexSchedules,
 } from "../slices/complexesSlice";
 import { AppDispatch } from "../store";
 
@@ -251,10 +256,11 @@ export const postFootballFields =
   };
 
 export interface ScheduleParsed {
-  openingTime: string;
+  _id?: string;
   closingTime: string;
-  weekDays: number[];
+  openingTime: string;
   sport: string;
+  weekDays: number[];
 }
 
 interface PostComplexSchedulesProps {
@@ -277,6 +283,61 @@ export const postComplexSchedules =
         updateComplexSchedules({
           complexId: body.complexId,
           complexSchedules: resp.data.newComplexSchedules,
+        })
+      );
+
+      callback();
+    } catch (error) {
+      console.error({ error });
+    }
+  };
+
+export const putComplexSchedules =
+  ({ body, callback = () => {} }: PostComplexSchedulesProps) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      const resp = await replayAPI.put<PutMultipleSchedulesResponse>(
+        "/complexes-schedules/multiple",
+        body
+      );
+      dispatch(
+        updateComplexSchedules({
+          complexId: body.complexId,
+          complexSchedules: resp.data.updatedComplexSchedules,
+        })
+      );
+
+      callback();
+    } catch (error) {
+      console.error({ error });
+    }
+  };
+
+interface DeleteComplexSchedulesProps {
+  body: {
+    complexId: string;
+    schedulesIds: string[];
+  };
+  callback?: () => void;
+}
+
+export const deleteComplexSchedule =
+  ({ body, callback = () => {} }: DeleteComplexSchedulesProps) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      const resp = await replayAPI.delete<DeleteScheduleResponse>(
+        `/complexes-schedules?schedulesIds=${body.schedulesIds}`
+      );
+
+      console.log(
+        "franco the response --> ",
+        JSON.stringify(resp.data, null, 4)
+      );
+
+      dispatch(
+        removeComplexSchedules({
+          complexId: body.complexId,
+          schedulesIds: resp.data.removedSchedules,
         })
       );
 

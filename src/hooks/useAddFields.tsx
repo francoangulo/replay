@@ -1,19 +1,22 @@
 import { DateTime } from "luxon";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ComplexSchedule } from "../interfaces/ComplexesSchedules";
+import { checkScheduleOverlapping } from "../utils/utils";
 
+// We use this state cause the modal is generic and we have to know what we are editing
 export interface EditingState {
   scheduleIdx: number;
   editingSchedule: string;
 }
 
 export interface ScheduleState {
-  openingHour: string;
-  openingMinute: string;
+  _id?: string;
   closingHour: string;
   closingMinute: string;
-  weekDays: number[];
+  openingHour: string;
+  openingMinute: string;
   sport: string;
+  weekDays: number[];
 }
 
 const initialState: ScheduleState[] = [
@@ -30,25 +33,28 @@ const initialState: ScheduleState[] = [
 const parseExistingSchedules = (
   existingSchedules: ComplexSchedule[]
 ): ScheduleState[] => {
-  return existingSchedules.map(({ weekDays, openingTime, closingTime }) => {
-    const [openingHour, openingMinute] = openingTime.split(":");
-    const [closingHour, closingMinute] = closingTime.split(":");
-    return {
-      openingHour,
-      openingMinute,
-      closingHour,
-      closingMinute,
-      weekDays,
-      sport: "football",
-    };
-  });
+  return existingSchedules.map(
+    ({ weekDays, openingTime, closingTime, _id }) => {
+      const [openingHour, openingMinute] = openingTime.split(":");
+      const [closingHour, closingMinute] = closingTime.split(":");
+      return {
+        openingHour,
+        openingMinute,
+        closingHour,
+        closingMinute,
+        weekDays,
+        sport: "football",
+        _id: _id,
+      };
+    }
+  );
 };
 
 interface HookProps {
   existingSchedules?: ComplexSchedule[];
 }
 
-export const useAddFields = ({ existingSchedules }: HookProps) => {
+export const useAddFields = ({ existingSchedules }: HookProps = {}) => {
   const parsedExistingSchedules = existingSchedules
     ? parseExistingSchedules(existingSchedules)
     : undefined;
@@ -76,6 +82,11 @@ export const useAddFields = ({ existingSchedules }: HookProps) => {
     editingSchedule: "opening",
   });
 
+  useEffect(() => {
+    existingSchedules &&
+      setFootballSchedules(parseExistingSchedules(existingSchedules));
+  }, [existingSchedules]);
+
   const addFootballSchedule = () => {
     const newFootballSchedulesState = [...footballSchedules];
     newFootballSchedulesState.push({
@@ -89,142 +100,47 @@ export const useAddFields = ({ existingSchedules }: HookProps) => {
     setFootballSchedules(newFootballSchedulesState);
   };
 
-  const checkScheduleOverlapping = (
-    date: Date, // This is a JS date format because the picker needs that format
-    scheduleIdx: number
-  ): boolean => {
-    // the hours from the date we want to check
-    const newDateHours = date.getHours();
-    // the minutes from the date we want to check
-    const newDateMinutes = date.getMinutes();
-    const newDate = DateTime.fromObject({
-      hour: newDateHours,
-      minute: newDateMinutes,
-    });
-    const overlaps = footballSchedules.some(
-      (
-        { openingHour, openingMinute, closingHour, closingMinute, weekDays },
-        idx
-      ) => {
-        if (scheduleIdx !== idx) {
-          // nos manejamos con horas y minutos en lugar de fechas porque la fecha es
-          // solo de un día en particular... las horas y los minutos son genéricos
-
-          const openingDate = DateTime.fromObject({
-            hour: Number(openingHour),
-            minute: Number(openingMinute),
-          });
-          const closingDate = DateTime.fromObject({
-            hour: Number(closingHour),
-            minute: Number(closingMinute),
-          });
-          const numberOpeningHour = Number(openingHour);
-          const numberOpeningMinute = Number(openingMinute);
-          const numberClosingHour = Number(closingHour);
-          const numberClosingMinute = Number(closingMinute);
-
-          if (
-            // el horario actual coincide en días con otro horario ya existente
-            footballSchedules[scheduleIdx].weekDays.some(
-              (day) => weekDays.indexOf(day) >= 0
-            ) &&
-            // la hora está entre otro horario
-            ((newDateHours > numberOpeningHour &&
-              newDateHours < numberClosingHour) ||
-              // misma hora, pero mayor minuto (cae dentro por los minutos)
-              (newDateHours === numberOpeningHour &&
-                newDateMinutes > numberOpeningMinute) ||
-              // misma hora, pero menor minuto (cae dentro por los minutos)
-              (newDateHours === numberClosingHour &&
-                newDateMinutes < numberClosingMinute))
-          ) {
-            setCurrentPickingError(
-              "Los horarios de una misma cancha no pueden superponerse A"
-            );
-            return true;
-          }
-
-          const currentScheduleNumberOpeningHour = Number(
-            footballSchedules[scheduleIdx].openingHour
-          );
-          const currentScheduleNumberOpeningMinute = Number(
-            footballSchedules[scheduleIdx].openingMinute
-          );
-          const currentScheduleNumberClosingHour = Number(
-            footballSchedules[scheduleIdx].closingHour
-          );
-          const currentScheduleNumberClosingMinute = Number(
-            footballSchedules[scheduleIdx].closingMinute
-          );
-          if (editing.editingSchedule === "opening") {
-            if (
-              footballSchedules[scheduleIdx].weekDays.some(
-                (day) => weekDays.indexOf(day) >= 0
-              ) &&
-              (((numberOpeningHour > newDateHours ||
-                (numberOpeningHour === newDateHours &&
-                  numberOpeningMinute > newDateMinutes)) &&
-                numberClosingHour < currentScheduleNumberClosingHour) ||
-                (numberClosingHour === currentScheduleNumberClosingHour &&
-                  numberClosingMinute < currentScheduleNumberClosingMinute))
-            ) {
-              setCurrentPickingError(
-                "Los horarios de una misma cancha no pueden superponerse B"
-              );
-              return true;
-            }
-          } else {
-            if (
-              footballSchedules[scheduleIdx].weekDays.some(
-                (day) => weekDays.indexOf(day) >= 0
-              ) &&
-              (((numberOpeningHour > currentScheduleNumberOpeningHour ||
-                (numberOpeningHour === currentScheduleNumberOpeningHour &&
-                  numberOpeningMinute > currentScheduleNumberOpeningMinute)) &&
-                numberClosingHour < newDateHours) ||
-                (numberClosingHour === newDateHours &&
-                  numberClosingMinute < newDateMinutes))
-            ) {
-              setCurrentPickingError(
-                "Los horarios de una misma cancha no pueden superponerse C"
-              );
-              return true;
-            }
-          }
-        }
-        return false;
-      }
-    );
-
-    return overlaps;
-  };
-
   const onScheduleChange = (date: Date) => {
     const newFootballSchedulesState = [...footballSchedules];
     const { editingSchedule, scheduleIdx } = editing;
-    const overlaps = checkScheduleOverlapping(date, scheduleIdx);
+
+    // First check if the schedule overlaps with an existing one
+    const overlaps = checkScheduleOverlapping({
+      date,
+      scheduleIdx,
+      compareWithSchedules: footballSchedules,
+      onScheduleOverlapping: () =>
+        setCurrentPickingError(
+          "Ya existe un horario en los mismos días que se superpone con este horario"
+        ),
+    });
     if (overlaps) {
       return;
     }
     // we can do this cause this type of variables are those ones that are passed by reference
     const currentSchedule = newFootballSchedulesState[scheduleIdx];
-    const newDateHours = String(date.getHours()).padStart(2, "0");
-    const newDateMinutes = String(date.getMinutes()).padEnd(2, "0");
+    const newDate = DateTime.fromObject({
+      hour: date.getHours(),
+      minute: date.getMinutes(),
+    });
     if (editingSchedule === "opening") {
-      if (
-        newDateHours > currentSchedule.closingHour ||
-        (newDateHours === currentSchedule.closingHour &&
-          (newDateMinutes > currentSchedule.closingMinute ||
-            newDateMinutes === currentSchedule.closingMinute))
-      ) {
+      const currentClosingDate =
+        currentSchedule.closingHour !== "XX"
+          ? DateTime.fromObject({
+              hour: Number(currentSchedule.closingHour),
+              minute: Number(currentSchedule.closingMinute),
+            })
+          : false;
+
+      if (currentClosingDate && newDate >= currentClosingDate) {
         setCurrentPickingError(
           "La hora de apertura debe ser antes de la hora de cierre"
         );
         return;
       }
 
-      currentSchedule.openingHour = newDateHours;
-      currentSchedule.openingMinute = newDateMinutes;
+      currentSchedule.openingHour = String(newDate.hour).padStart(2, "0");
+      currentSchedule.openingMinute = String(newDate.minute).padEnd(2, "0");
 
       if (scheduleError.scheduleType === "opening") {
         setScheduleError({ ...scheduleError, scheduleType: "" });
@@ -233,22 +149,22 @@ export const useAddFields = ({ existingSchedules }: HookProps) => {
         setScheduleError({ ...scheduleError, scheduleType: "closing" });
       }
     } else {
-      if (
-        currentSchedule.openingHour !== "XX" &&
-        currentSchedule.openingMinute !== "XX" &&
-        (newDateHours < currentSchedule.openingHour ||
-          (newDateHours === currentSchedule.openingHour &&
-            (newDateMinutes < currentSchedule.openingMinute ||
-              newDateMinutes === currentSchedule.openingMinute)))
-      ) {
+      const currentOpeningDate =
+        currentSchedule.openingHour !== "XX"
+          ? DateTime.fromObject({
+              hour: Number(currentSchedule.openingHour),
+              minute: Number(currentSchedule.openingMinute),
+            })
+          : false;
+      if (currentOpeningDate && newDate <= currentOpeningDate) {
         setCurrentPickingError(
           "La hora de cierre debe ser después de la hora de apertura"
         );
         return;
       }
 
-      currentSchedule.closingHour = newDateHours;
-      currentSchedule.closingMinute = newDateMinutes;
+      currentSchedule.closingHour = String(newDate.hour).padStart(2, "0");
+      currentSchedule.closingMinute = String(newDate.minute).padEnd(2, "0");
       if (scheduleError.scheduleType === "closing") {
         setScheduleError({ ...scheduleError, scheduleType: "" });
       }
@@ -276,7 +192,7 @@ export const useAddFields = ({ existingSchedules }: HookProps) => {
         );
     }
     newFootballSchedulesState[scheduleIdx].weekDays.sort();
-    setFootballSchedules;
+    setFootballSchedules(newFootballSchedulesState);
   };
 
   const onEditing = (newEditing: EditingState) => {
@@ -309,20 +225,30 @@ export const useAddFields = ({ existingSchedules }: HookProps) => {
           return -1;
         }
         return (
-          checkScheduleOverlapping(
-            DateTime.fromObject({
+          checkScheduleOverlapping({
+            date: DateTime.fromObject({
               hour: Number(openingHour),
               minute: Number(openingMinute),
             }).toJSDate(),
-            idx
-          ) ||
-          checkScheduleOverlapping(
-            DateTime.fromObject({
+            scheduleIdx: idx,
+            compareWithSchedules: footballSchedules,
+            onScheduleOverlapping: () =>
+              setCurrentPickingError(
+                "Ya existe un horario en los mismos días que se superpone con este horario"
+              ),
+          }) ||
+          checkScheduleOverlapping({
+            date: DateTime.fromObject({
               hour: Number(closingHour),
               minute: Number(closingMinute),
             }).toJSDate(),
-            idx
-          )
+            scheduleIdx: idx,
+            compareWithSchedules: footballSchedules,
+            onScheduleOverlapping: () =>
+              setCurrentPickingError(
+                "Ya existe un horario en los mismos días que se superpone con este horario"
+              ),
+          })
         );
       }
     );

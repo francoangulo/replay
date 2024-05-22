@@ -1,7 +1,8 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { colors } from "../../theme/appTheme";
 import IonIcon from "react-native-vector-icons/Ionicons";
+import { TextComponent } from "../../components/TextComponent";
 
 interface Props {
   playersAmount: number;
@@ -55,10 +56,12 @@ export const FieldsAmountSelector = ({
   return (
     <View style={{ gap: 8 }}>
       <View style={styles.fieldTypeContainer}>
-        <Text style={{ opacity: 0.6 }}>Fútbol</Text>
-        <Text style={{ fontWeight: "bold", fontSize: 15, opacity: 0.5 }}>
-          {playersAmount}
-        </Text>
+        <TextComponent children={"Fútbol"} type="text" />
+        <TextComponent
+          children={playersAmount}
+          type="text"
+          customStyles={{ fontWeight: "bold" }}
+        />
       </View>
       <View style={{ alignItems: "center" }}>
         <View
@@ -69,13 +72,11 @@ export const FieldsAmountSelector = ({
             paddingHorizontal: 8,
           }}
         >
-          <Text
-            style={{
-              fontWeight: "bold",
-            }}
-          >
-            {fieldsState[playersAmountString].fieldsAmount}
-          </Text>
+          <TextComponent
+            children={fieldsState[playersAmountString].fieldsAmount}
+            type="text"
+            customStyles={{ fontWeight: "bold", color: "#181818" }}
+          />
         </View>
       </View>
       <View style={{ flexDirection: "row", gap: 4 }}>

@@ -9,6 +9,8 @@ import {
 } from "react-native-permissions";
 import { Complex } from "../interfaces/complexes";
 import { Asset } from "react-native-image-picker";
+import { DateTime } from "luxon";
+import { ScheduleState } from "../hooks/useAddFields";
 
 /**
  * Generates a random pastel color based on the given number.
@@ -286,4 +288,80 @@ export const buildImageObjectToUpload = (image: Asset): BuiltImage | false => {
   } else {
     return false;
   }
+};
+
+interface CheckScheduleOverlappingProps {
+  date: Date;
+  scheduleIdx: number;
+  onScheduleOverlapping: () => void;
+  compareWithSchedules: ScheduleState[];
+}
+
+/**
+ * Checks if a new schedule overlaps with existing schedules.
+ *
+ * @param date - The date of the new schedule.
+ * @param scheduleIdx - The index of the new schedule.
+ * @param onScheduleOverlapping - Callback function to be executed when overlapping is detected.
+ * @param compareWithSchedules - Array of existing schedules to compare against.
+ *
+ * @returns - This function does not return anything.
+ */
+
+export const checkScheduleOverlapping = ({
+  date, // This is a JS date format because the picker needs that format
+  scheduleIdx,
+  onScheduleOverlapping,
+  compareWithSchedules,
+}: CheckScheduleOverlappingProps): boolean => {
+  // the hours from the date we want to check
+  const newDateHours = date.getHours();
+  // the minutes from the date we want to check
+  const newDateMinutes = date.getMinutes();
+  const newDate = DateTime.fromObject({
+    hour: newDateHours,
+    minute: newDateMinutes,
+  });
+  const overlaps = compareWithSchedules.some(
+    (
+      { openingHour, openingMinute, closingHour, closingMinute, weekDays },
+      idx
+    ) => {
+      if (scheduleIdx !== idx) {
+        if (
+          [openingHour, openingMinute, closingHour, closingMinute].includes(
+            "XX"
+          )
+        ) {
+          return false;
+        }
+        // nos manejamos con horas y minutos en lugar de fechas porque la fecha es
+        // solo de un día en particular... las horas y los minutos son genéricos
+
+        const openingDate = DateTime.fromObject({
+          hour: Number(openingHour),
+          minute: Number(openingMinute),
+        });
+        const closingDate = DateTime.fromObject({
+          hour: Number(closingHour),
+          minute: Number(closingMinute),
+        });
+
+        if (
+          // el horario actual coincide en días con otro horario ya existente
+          compareWithSchedules[scheduleIdx]?.weekDays.some(
+            (day) => weekDays?.indexOf(day) >= 0
+          ) &&
+          // la hora está entre otro horario
+          newDate > openingDate &&
+          newDate < closingDate
+        ) {
+          onScheduleOverlapping();
+          return true;
+        }
+      }
+      return false;
+    }
+  );
+  return overlaps;
 };

@@ -45,6 +45,14 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
   });
 
   useEffect(() => {
+    navigation.replace("AddFieldsScreen", {
+      complexId: "123",
+    });
+    return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (
       modalState.visible === false &&
       modalState.status === "success" &&

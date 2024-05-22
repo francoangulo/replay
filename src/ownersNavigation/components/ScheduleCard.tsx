@@ -1,23 +1,19 @@
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { colors, cardStyle } from "../../theme/appTheme";
-import { EditingState } from "../../hooks/useAddFields";
+import { EditingState, ScheduleState } from "../../hooks/useAddFields";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import CheckBox from "@react-native-community/checkbox";
-
-export interface ScheduleState {
-  openingHour: string;
-  openingMinute: string;
-  closingHour: string;
-  closingMinute: string;
-  weekDays: number[];
-}
+import { StyleSheet } from "react-native";
+import { TextComponent } from "../../components/TextComponent";
+import { TimePickerLabel } from "./TimePickerLabel";
 
 interface Props {
   scheduleIdx: number;
   setPickerVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onEditing: (editing: EditingState) => void;
-  onDeleteSchedule: (scheduleIdx: number) => void;
+  onDeleteSchedule?: (scheduleIdx: number) => void;
+  onDeleteExistingSchedule?: (scheduleIdx: number, _id: string) => void;
   schedule: ScheduleState;
   schedulesLength: number;
   scheduleError: {
@@ -37,12 +33,14 @@ export const ScheduleCard = ({
   setPickerVisible,
   schedule,
   onEditing,
-  onDeleteSchedule,
+  onDeleteSchedule = () => {},
+  onDeleteExistingSchedule = () => {},
   schedulesLength,
   scheduleError,
   onWeekDaysChange,
 }: Props) => {
-  const { openingHour, openingMinute, closingHour, closingMinute } = schedule;
+  const { openingHour, openingMinute, closingHour, closingMinute, _id } =
+    schedule;
 
   const closingError =
     scheduleError.scheduleIdx.includes(scheduleIdx) &&
@@ -65,182 +63,61 @@ export const ScheduleCard = ({
   ];
 
   return (
-    <View key={`schedule-${scheduleIdx}`} style={{ flex: 1, width: "100%" }}>
-      <View
-        style={{
-          gap: 8,
-          flex: 1,
-          width: "100%",
-          ...(cardStyle as Object),
-        }}
-      >
-        <View style={{ gap: 16, flexDirection: "row" }}>
-          <View
-            style={{
-              alignItems: "center",
-              gap: 8,
-              flex: 1,
-            }}
-          >
-            <Text style={{ ...(openingError && { color: colors.danger }) }}>
-              Apertura
-            </Text>
-            <TouchableOpacity
-              style={{
-                flexDirection: "row",
-                gap: 4,
-                backgroundColor: colors.inputBg,
-                padding: 4,
-                borderRadius: 8,
+    <View key={`schedule-${scheduleIdx}`} style={styles.cardContainer}>
+      <View style={[cardStyle, styles.card]}>
+        <View style={styles.pickersRow}>
+          <View style={styles.pickerContainer}>
+            <TextComponent
+              type="text"
+              children={"Apertura"}
+              customStyles={{
+                color: openingError ? colors.danger : colors.textDark,
               }}
-              onPress={() => {
+            />
+            <TimePickerLabel
+              error={openingError}
+              hour={openingHour}
+              minute={openingMinute}
+              onPickerPress={() => {
                 onEditing({ scheduleIdx, editingSchedule: "opening" });
                 setPickerVisible(true);
               }}
-            >
-              <Text
-                style={{
-                  backgroundColor: `${colors.appBg}`,
-                  padding: 2,
-                  ...(openingError && { color: colors.danger }),
-                  fontSize: 20,
-                  borderRadius: 4,
-                }}
-              >
-                {openingHour[0]}
-              </Text>
-              <Text
-                style={{
-                  backgroundColor: `${colors.appBg}`,
-                  padding: 2,
-                  ...(openingError && { color: colors.danger }),
-                  fontSize: 20,
-                  borderRadius: 4,
-                }}
-              >
-                {openingHour[1]}
-              </Text>
-              <Text style={{ ...(openingError && { color: colors.danger }) }}>
-                :
-              </Text>
-              <Text
-                style={{
-                  backgroundColor: `${colors.appBg}`,
-                  padding: 2,
-                  ...(openingError && { color: colors.danger }),
-                  fontSize: 20,
-                  borderRadius: 4,
-                }}
-              >
-                {openingMinute[0]}
-              </Text>
-              <Text
-                style={{
-                  backgroundColor: `${colors.appBg}`,
-                  padding: 2,
-                  ...(openingError && { color: colors.danger }),
-                  fontSize: 20,
-                  borderRadius: 4,
-                }}
-              >
-                {openingMinute[1]}
-              </Text>
-            </TouchableOpacity>
+            />
           </View>
-          <View style={{ alignItems: "center", gap: 8, flex: 1 }}>
-            <Text style={{ ...(closingError && { color: colors.danger }) }}>
-              Cierre
-            </Text>
-            <TouchableOpacity
-              style={{
-                flexDirection: "row",
-                gap: 4,
-                backgroundColor: "#e9e9e9",
-                padding: 4,
-                borderRadius: 8,
+          <View style={styles.pickerContainer}>
+            <TextComponent
+              type="text"
+              children={"Cierre"}
+              customStyles={{
+                color: closingError ? colors.danger : colors.textDark,
               }}
-              onPress={() => {
+            />
+            <TimePickerLabel
+              error={closingError}
+              hour={closingHour}
+              minute={closingMinute}
+              onPickerPress={() => {
                 onEditing({ scheduleIdx, editingSchedule: "closing" });
                 setPickerVisible(true);
               }}
-            >
-              <Text
-                style={{
-                  backgroundColor: colors.appBg,
-                  padding: 2,
-                  ...(closingError && { color: colors.danger }),
-                  fontSize: 20,
-                  borderRadius: 4,
-                }}
-              >
-                {closingHour[0]}
-              </Text>
-              <Text
-                style={{
-                  backgroundColor: colors.appBg,
-                  padding: 2,
-                  ...(closingError && { color: colors.danger }),
-                  fontSize: 20,
-                  borderRadius: 4,
-                }}
-              >
-                {closingHour[1]}
-              </Text>
-              <Text style={{ ...(closingError && { color: colors.danger }) }}>
-                :
-              </Text>
-              <Text
-                style={{
-                  backgroundColor: colors.appBg,
-                  padding: 2,
-                  ...(closingError && { color: colors.danger }),
-                  fontSize: 20,
-                  borderRadius: 4,
-                }}
-              >
-                {closingMinute[0]}
-              </Text>
-              <Text
-                style={{
-                  backgroundColor: colors.appBg,
-                  padding: 2,
-                  ...(closingError && { color: colors.danger }),
-                  fontSize: 20,
-                  borderRadius: 4,
-                }}
-              >
-                {closingMinute[1]}
-              </Text>
-            </TouchableOpacity>
+            />
           </View>
         </View>
         {/* weekdays array below */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-evenly",
-            gap: 16,
-            marginTop: 16,
-          }}
-        >
+        <View style={styles.weekdaysContainer}>
           {weekDays.map(({ index: dayIndex, label }, idx) => {
             return (
-              <View
-                style={{ alignItems: "center", gap: 4 }}
-                key={`day-check-${idx}`}
-              >
-                <View style={{ width: 20, height: 20 }}>
-                  <CheckBox
-                    disabled={false}
-                    value={schedule.weekDays.includes(dayIndex)}
-                    onValueChange={(newValue) => {
-                      onWeekDaysChange(scheduleIdx, dayIndex, newValue);
-                    }}
-                    style={{ width: 20, height: 20 }}
-                    onCheckColor={colors.primary}
-                    onTintColor={colors.primary}
-                  />
-                </View>
+              <View style={styles.weekdayColumn} key={`day-check-${idx}`}>
+                <CheckBox
+                  disabled={false}
+                  value={schedule.weekDays.includes(dayIndex)}
+                  onValueChange={(newValue) => {
+                    onWeekDaysChange(scheduleIdx, dayIndex, newValue);
+                  }}
+                  style={styles.weekdayCheckbox}
+                  onCheckColor={colors.primary}
+                  onTintColor={colors.primary}
+                />
                 <Text>{label.slice(0, 3)}</Text>
               </View>
             );
@@ -248,27 +125,57 @@ export const ScheduleCard = ({
         </View>
         {schedulesLength > 1 ? (
           <TouchableOpacity
-            style={{
-              justifyContent: "center",
-              flex: 1,
-              borderWidth: 1,
-              borderColor: colors.danger,
-              alignItems: "center",
-              padding: 8,
-              borderRadius: 5,
-              borderStyle: "dashed",
+            style={styles.removeScheduleButton}
+            onPress={() => {
+              _id
+                ? onDeleteExistingSchedule(scheduleIdx, _id)
+                : onDeleteSchedule(scheduleIdx);
             }}
-            onPress={() => onDeleteSchedule(scheduleIdx)}
           >
             <IonIcon name="trash-outline" color={colors.danger} size={20} />
           </TouchableOpacity>
         ) : null}
       </View>
       {closingError && (
-        <Text style={{ fontSize: 12, color: colors.danger }}>
-          {scheduleError.error}
-        </Text>
+        <TextComponent
+          type="text"
+          children={scheduleError.error}
+          customStyles={{ color: colors.danger }}
+        />
       )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  cardContainer: { flex: 1, width: "100%" },
+  card: {
+    gap: 8,
+    flex: 1,
+    width: "100%",
+  },
+  pickersRow: { gap: 16, flexDirection: "row" },
+  pickerContainer: {
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+  },
+  weekdaysContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    gap: 16,
+    marginTop: 16,
+  },
+  weekdayColumn: { alignItems: "center", gap: 4 },
+  weekdayCheckbox: { width: 20, height: 20 },
+  removeScheduleButton: {
+    borderColor: colors.danger,
+    justifyContent: "center",
+    flex: 1,
+    borderWidth: 1,
+    alignItems: "center",
+    padding: 8,
+    borderRadius: 12,
+    borderStyle: "dashed",
+  },
+});

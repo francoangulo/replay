@@ -2,7 +2,7 @@ import React from "react";
 import { StyleProp, Text, TextStyle } from "react-native";
 import { textComponentStyles } from "../theme/appTheme";
 interface Props {
-  children: string | string[];
+  children: string | string[] | number;
   type: "title" | "subtitle" | "subtitleLg" | "text";
   customStyles?: StyleProp<TextStyle>;
 }

@@ -1,8 +1,10 @@
 import React from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, StyleSheet, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { colors } from "../../theme/appTheme";
-import { EditingState } from "../../hooks/useAddFields";
+import { EditingState, useAddFields } from "../../hooks/useAddFields";
+import { TextComponent } from "../../components/TextComponent";
+import { GenericButton } from "../../components/GenericButton";
 
 interface Props {
   modalVisible: boolean;
@@ -25,28 +27,26 @@ export const TimePickerModal = ({
   setModalVisible,
   onScheduleChange,
 }: Props) => {
+  const {} = useAddFields();
+
   return (
     <Modal animationType="fade" transparent={true} visible={modalVisible}>
       <View
-        style={{
-          backgroundColor: colors.appFadeBg,
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 32,
-        }}
+        style={[
+          { backgroundColor: colors.appFadeBg },
+          styles.modalScreenContainer,
+        ]}
       >
         <View
-          style={{
-            backgroundColor: colors.appBg,
-            borderRadius: 4,
-            padding: 16,
-          }}
+          style={[{ backgroundColor: colors.appBg }, styles.modalCardContainer]}
         >
-          <Text style={{ fontWeight: "bold", fontSize: 14 }}>
-            Selecciona el horario de{" "}
-            {editing.editingSchedule === "opening" ? "apertura" : "cierre"}
-          </Text>
+          <TextComponent
+            children={`Selecciona el horario de ${
+              editing.editingSchedule === "opening" ? "apertura" : "cierre"
+            }`}
+            type="subtitle"
+          />
+
           <DatePicker
             mode="time"
             date={currentPickingDate}
@@ -57,54 +57,31 @@ export const TimePickerModal = ({
               setCurrentPickingDate(date);
             }}
           />
-          <View
-            style={{
-              alignItems: "center",
-              flexWrap: "wrap",
-              flexDirection: "row",
-            }}
-          >
+          <View style={styles.errorContainer}>
             {currentPickingError && (
-              <Text
-                style={{
-                  color: colors.danger,
-                  flexWrap: "wrap",
-                  flex: 1,
-                  fontSize: 12,
-                }}
-              >
-                {currentPickingError} *
-              </Text>
+              <TextComponent
+                children={`${currentPickingError} *`}
+                type="text"
+                customStyles={styles.errorText}
+              />
             )}
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              gap: 16,
-            }}
-          >
-            <TouchableOpacity
-              style={styles.modalCancelButton}
-              onPress={() => {
+          <View style={styles.modalFooter}>
+            <GenericButton
+              buttonText="Cancelar"
+              onButtonPress={() => {
                 setCurrentPickingError("");
                 setModalVisible(false);
               }}
-            >
-              <Text style={{ color: colors.danger, fontWeight: "bold" }}>
-                Cancelar
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalConfirmButton}
-              onPress={() => {
-                onScheduleChange(currentPickingDate);
-              }}
-            >
-              <Text style={{ color: colors.appBg, fontWeight: "bold" }}>
-                Confirmar
-              </Text>
-            </TouchableOpacity>
+              buttonType="dangerNoBg"
+              customButtonStyle={styles.footerButtons}
+            />
+            <GenericButton
+              buttonText="Confirmar"
+              buttonType="primary"
+              onButtonPress={() => onScheduleChange(currentPickingDate)}
+              customButtonStyle={styles.footerButtons}
+            />
           </View>
         </View>
       </View>
@@ -127,5 +104,29 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     flex: 1.25,
     alignItems: "center",
+  },
+  modalScreenContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 32,
+  },
+  modalCardContainer: {
+    borderRadius: 16,
+    padding: 16,
+  },
+  errorContainer: {
+    alignItems: "center",
+    flexWrap: "wrap",
+    flexDirection: "row",
+  },
+  errorText: { color: colors.danger },
+  modalFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 16,
+  },
+  footerButtons: {
+    flex: 1,
   },
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TouchableOpacity, View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { StackScreenProps } from "@react-navigation/stack";
 import { ProfileStackParamList } from "../navigators/ProfileNavigatorOwners";
@@ -7,7 +7,7 @@ import { colors, cardStyle } from "../../theme/appTheme";
 import { useAddFields } from "../../hooks/useAddFields";
 import { TimePickerModal } from "../components/TimePickerModal";
 import { ScheduleCard } from "../components/ScheduleCard";
-import { useAppDispatch } from "../../hooks/redux";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import ADIcon from "react-native-vector-icons/AntDesign";
 import { FadeModal } from "../components/FadeModal";
 import { FieldsAmountSelector } from "../components/FieldsAmountSelector";
@@ -21,10 +21,19 @@ import { FieldsAddSuccess } from "../components/ModalsBodies/FieldsAddSuccess";
 import { FieldsAddLoading } from "../components/ModalsBodies/FieldsAddLoading";
 import { FieldsAddError } from "../components/ModalsBodies/FieldsAddError";
 import { FadeModalState } from "../../interfaces/FadeModal";
+import { selectComplexes } from "../../redux/slices/complexesSlice";
 
 type Props = StackScreenProps<ProfileStackParamList, "AddFieldsScreen">;
 
 export const AddFieldsScreen = ({ navigation, route }: Props) => {
+  const complexId = route?.params?.complexId;
+
+  const { complexes } = useAppSelector(selectComplexes);
+
+  const complex = complexes.find(
+    (currentComplex) => currentComplex._id === complexId
+  );
+
   const {
     currentPickingError,
     currentPickingDate,
@@ -41,7 +50,11 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
     onEditing,
     scheduleError,
     onWeekDaysChange,
-  } = useAddFields({});
+  } = useAddFields(
+    complex?.ComplexSchedules?.length
+      ? { existingSchedules: complex?.ComplexSchedules }
+      : {}
+  );
 
   const dispatch = useAppDispatch();
 
@@ -63,8 +76,6 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalState]);
-
-  const complexId = route?.params?.complexId;
 
   const submitComplex = () => {
     if (false) {
@@ -116,7 +127,10 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
         navigation={navigation}
         route={route}
       />
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+      >
         <View style={styles.inputsCardsContainers}>
           <TextComponent type="subtitleLg" children={"Cantidad de canchas"} />
 
@@ -163,12 +177,16 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
                 onWeekDaysChange={onWeekDaysChange}
               />
             ))}
-            <TouchableOpacity
-              style={styles.dashedButton}
-              onPress={addFootballSchedule}
-            >
-              <ADIcon name="plus" size={24} color={colors.primary} />
-            </TouchableOpacity>
+            <GenericButton
+              buttonType="secondary"
+              buttonText="Agregar horario"
+              rightIcon={
+                <ADIcon name="plus" size={24} color={colors.primary} />
+              }
+              customButtonStyle={styles.dashedButton}
+              customTextStyle={{ color: colors.primary }}
+              onButtonPress={addFootballSchedule}
+            />
           </View>
         </View>
       </ScrollView>
@@ -212,8 +230,9 @@ export const AddFieldsScreen = ({ navigation, route }: Props) => {
 };
 
 const styles = StyleSheet.create({
-  scrollViewContent: { paddingBottom: 60 },
   screenContainer: { flex: 1 },
+  scrollView: { flex: 1 },
+  scrollViewContent: { paddingBottom: 80 },
   addFieldButton: {
     borderWidth: 1,
     borderColor: colors.primary,
@@ -272,7 +291,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#00000044",
     width: "100%",
-    borderRadius: 5,
     borderStyle: "dashed",
+    backgroundColor: "transparent",
+    color: colors.primary,
   },
 });

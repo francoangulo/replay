@@ -10,7 +10,7 @@ import {
 import { TextComponent } from "../../components/TextComponent";
 import { ProfileStackParamList } from "../navigators/ProfileNavigatorOwners";
 import { cardStyle, colors } from "../../theme/appTheme";
-import { useAppDispatch } from "../../hooks/redux";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { deleteComplex } from "../../redux/actions/complexes";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useComplexMainPicture } from "../../hooks/useComplexMainPicture";
@@ -19,6 +19,7 @@ import ImageColors from "react-native-image-colors";
 import { ImageColorsResult } from "react-native-image-colors/lib/typescript/types";
 import MCIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import IonIcon from "react-native-vector-icons/Ionicons";
+import { selectComplexById } from "../../redux/slices/complexesSlice";
 
 interface RowCardProps {
   imageColor: string;
@@ -44,7 +45,10 @@ const RowCard = ({ amount, text, Icon, onPress = () => {} }: RowCardProps) => {
 type ScreenProps = StackScreenProps<ProfileStackParamList, "ComplexScreen">;
 
 export const ComplexScreen = ({ route, navigation }: ScreenProps) => {
-  const { complex } = route.params;
+  const { complexId } = route.params;
+  const complex = useAppSelector((state) =>
+    selectComplexById(state, complexId)
+  )!;
   const dispatch = useAppDispatch();
   const { top } = useSafeAreaInsets();
   const [imageColor, setImageColor] = useState<string>("");

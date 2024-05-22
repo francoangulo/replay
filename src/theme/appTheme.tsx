@@ -3,7 +3,7 @@ import { Theme } from "react-native-calendars/src/types";
 
 export const colors = {
   appBg: "#fafafa",
-  appBgTransparent: "#fafafadd",
+  appBgTransparent: "#f8f8f8dd",
   appFadeBg: "#00000099",
   cardBg: "#ffffff",
   inputBg: "#e9e9e9",
@@ -18,6 +18,7 @@ export const colors = {
   warningLight: "#f7efdc",
   gray: "#808080",
   inputBorder: "#DDDDDD",
+  textDark: "#181818",
 };
 
 export const paddings = {

@@ -3,6 +3,7 @@ import {
   StyleProp,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   ViewStyle,
 } from "react-native";
@@ -16,8 +17,9 @@ interface Props {
   buttonType: keyof GenericButtonStyles;
   onButtonPress: () => void;
   buttonText: string;
-  rightIcon?: () => React.ReactNode;
+  rightIcon?: React.ReactNode;
   customButtonStyle?: StyleProp<ViewStyle>;
+  customTextStyle?: StyleProp<TextStyle>;
 }
 
 export const GenericButton = ({
@@ -26,20 +28,22 @@ export const GenericButton = ({
   buttonText,
   rightIcon,
   customButtonStyle,
+  customTextStyle,
 }: Props) => {
   const buttonFinalStyle = [genericButtonStyles[buttonType], customButtonStyle];
+  const textFinalStyle = [
+    styles.genericButtonText,
+    genericButtonTextStyles[buttonType],
+    customTextStyle,
+  ];
 
   return (
     <TouchableOpacity
       style={[styles.genericButton, ...buttonFinalStyle]}
       onPress={onButtonPress}
     >
-      <Text
-        style={[styles.genericButtonText, genericButtonTextStyles[buttonType]]}
-      >
-        {buttonText}
-      </Text>
-      {rightIcon && rightIcon()}
+      <Text style={textFinalStyle}>{buttonText}</Text>
+      {rightIcon}
     </TouchableOpacity>
   );
 };
@@ -48,7 +52,6 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 8,
     borderRadius: 12,
-    marginTop: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

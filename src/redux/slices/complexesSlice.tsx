@@ -69,6 +69,37 @@ export const complexesSlice = createSlice({
         return complex;
       });
     },
+    removeComplexSchedules: (
+      state,
+      action: PayloadAction<{
+        complexId: string;
+        schedulesIds: string[];
+      }>
+    ) => {
+      console.log(
+        "franco the payload --> ",
+        JSON.stringify(action.payload, null, 4)
+      );
+      state.complexes = state.complexes.map((complex) => {
+        if (complex._id === action.payload.complexId) {
+          complex.ComplexSchedules = complex.ComplexSchedules.filter(
+            (schedule) => {
+              console.log("franco the id to compare: ", schedule._id);
+
+              console.log(
+                "franco y lo incluye?? ",
+                action.payload.schedulesIds.includes(schedule._id)
+              );
+
+              if (!action.payload.schedulesIds.includes(schedule._id)) {
+                return schedule;
+              }
+            }
+          );
+        }
+        return complex;
+      });
+    },
     updateComplexMainPicture: (
       state,
       action: PayloadAction<{
@@ -157,6 +188,7 @@ export const {
   removeComplex,
   updateComplexFields,
   updateComplexSchedules,
+  removeComplexSchedules,
   updateComplexMainPicture,
   addComplexExtraPicturesURLs,
   removeComplexExtraPicturesURLs,
@@ -165,5 +197,8 @@ export const {
 } = complexesSlice.actions;
 
 export const selectComplexes = (state: RootState) => state.complexes;
+
+export const selectComplexById = (state: RootState, complexId: string) =>
+  state.complexes.complexes.find((complex) => complex._id === complexId);
 
 export default complexesSlice.reducer;

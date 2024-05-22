@@ -31,7 +31,9 @@ export const AdminComplexesScreenOwner = ({ navigation, route }: Props) => {
                 key={`complex-${idx}`}
                 complex={complex}
                 onPressCallback={() =>
-                  navigation.navigate("ComplexScreen", { complex })
+                  navigation.navigate("ComplexScreen", {
+                    complexId: complex._id,
+                  })
                 }
               />
             );
