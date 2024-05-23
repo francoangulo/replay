@@ -64,7 +64,10 @@ export const ComplexCard = ({
 };
 
 const styles = StyleSheet.create({
-  complexDataContainer: { rowGap: 8, padding: 16 },
+  complexDataContainer: {
+    rowGap: 8,
+    padding: 16,
+  },
   complexCard: {
     ...(cardStyle as Object),
     justifyContent: "space-between",

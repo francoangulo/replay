@@ -10,6 +10,7 @@ import { getRandomPastelColor } from "../../utils/utils";
 import { StackScreenProps } from "@react-navigation/stack";
 import { CalendarStackParamList } from "../navigators/CalendarNavigator";
 import { AgendaTurn } from "../components/AgendaTurn";
+import { TextComponent } from "../../components/TextComponent";
 
 type Props = StackScreenProps<CalendarStackParamList, "CalendarScreen">;
 
@@ -77,7 +78,7 @@ const CalendarScreen = ({ navigation, route }: Props) => {
           todayTextColor: colors.primary,
           calendarBackground: colors.appBg,
         }}
-        calendarStyle={{ flex: 1, height: "100%" }}
+        calendarStyle={styles.calendarComponent}
         pastScrollRange={6}
         futureScrollRange={1}
         items={items}
@@ -87,73 +88,49 @@ const CalendarScreen = ({ navigation, route }: Props) => {
         )}
         renderEmptyData={() => {
           return (
-            <View
-              style={{
-                padding: 32,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text>Sin Turnos</Text>
+            <View style={styles.noTurnsContainer}>
+              <TextComponent children={"Sin Turnos"} type="subtitleLg" />
             </View>
           );
         }}
         showScrollIndicator={true}
         showClosingKnob={true}
         showOnlySelectedDayItems={true}
-        onCalendarToggled={(calendarOpened) =>
-          setCalendarOpened(calendarOpened)
-        }
+        onCalendarToggled={(opened) => setCalendarOpened(opened)}
       />
-      <View
-        style={{
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 12,
-          gap: 4,
-        }}
-      >
-        <Text>{complex.name}</Text>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            gap: 24,
-            alignItems: "center",
-          }}
-        >
+      <View style={styles.footerContainer}>
+        <TextComponent children={complex.name} type="subtitle" />
+        <View style={styles.legendsContainer}>
           {!calendarOpened ? (
             complex.FootballFields.map(({ fieldNumber }, idx) => {
               return (
                 <View
-                  style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
+                  style={styles.legendComponent}
                   key={`field-number-${fieldNumber}-${idx}`}
                 >
                   <View
-                    style={{
-                      backgroundColor: getRandomPastelColor(
-                        getNumberForPastel(fieldNumber)
-                      ),
-                      width: 10,
-                      height: 10,
-                      borderRadius: 10,
-                    }}
+                    style={[
+                      {
+                        backgroundColor: getRandomPastelColor(
+                          getNumberForPastel(fieldNumber)
+                        ),
+                      },
+                      styles.legendDot,
+                    ]}
                   />
                   <Text>Cancha {fieldNumber}</Text>
                 </View>
               );
             })
           ) : (
-            <View
-              style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
-            >
+            <View style={styles.closedLegendContainer}>
               <View
-                style={{
-                  backgroundColor: colors.primary,
-                  width: 10,
-                  height: 10,
-                  borderRadius: 10,
-                }}
+                style={[
+                  {
+                    backgroundColor: colors.primary,
+                  },
+                  styles.closedLegendDot,
+                ]}
               />
               <Text>Días con turnos</Text>
             </View>
@@ -171,4 +148,36 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.appBg,
   },
+  calendarComponent: { flex: 1, height: "100%" },
+  noTurnsContainer: {
+    padding: 32,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  footerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 8,
+    gap: 12,
+  },
+  legendsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    columnGap: 8,
+    rowGap: 8,
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+  legendComponent: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 10,
+  },
+  closedLegendContainer: { flexDirection: "row", gap: 8, alignItems: "center" },
+  closedLegendDot: { width: 10, height: 10, borderRadius: 10 },
 });
