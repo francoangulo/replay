@@ -3,7 +3,6 @@ import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { TextComponent } from "../../components/TextComponent";
 import IonIcon from "react-native-vector-icons/Ionicons";
-import { cardStyle } from "../../theme/appTheme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface Props extends StackScreenProps<any, any> {
@@ -14,9 +13,7 @@ interface Props extends StackScreenProps<any, any> {
 export const ScreenHeader = ({ navigation, title, noBack = false }: Props) => {
   const { top: insetsTop } = useSafeAreaInsets();
   return (
-    <View
-      style={[cardStyle, { paddingTop: insetsTop }, styles.headerContainer]}
-    >
+    <View style={[{ paddingTop: insetsTop }, styles.headerContainer]}>
       {noBack ? null : (
         <TouchableOpacity onPress={() => navigation.pop()}>
           <IonIcon name="arrow-back" size={24} />
@@ -32,5 +29,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderRadius: 0,
     gap: 8,
+    padding: 16,
   },
 });
