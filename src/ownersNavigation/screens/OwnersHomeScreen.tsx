@@ -19,6 +19,7 @@ import { selectAuth } from "../../redux/slices/authSlice";
 import { InProgressTurn } from "../components/InProgressTurn";
 import { PendingConfirmationTurn } from "../components/PendingConfirmationTurn";
 import { IncomingTurn } from "../components/IncomingTurn";
+import { useWebSockets } from "../../hooks/useWebSockets";
 
 type Props = StackScreenProps<HomeStackParamList, "OwnersHomeScreen">;
 
@@ -27,6 +28,7 @@ export const OwnersHomeScreen = ({ route, navigation }: Props) => {
   const { ownerTurns } = useAppSelector(selectTurns);
   const { _id } = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
+  useWebSockets();
 
   const [refreshing, setRefreshing] = useState(false);
 
