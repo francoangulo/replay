@@ -85,8 +85,6 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
     return acc;
   }, 0);
 
-  console.log({ loadingImage });
-
   return (
     <TouchableOpacity
       style={cardStyle}

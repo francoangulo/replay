@@ -76,21 +76,10 @@ export const complexesSlice = createSlice({
         schedulesIds: string[];
       }>
     ) => {
-      console.log(
-        "franco the payload --> ",
-        JSON.stringify(action.payload, null, 4)
-      );
       state.complexes = state.complexes.map((complex) => {
         if (complex._id === action.payload.complexId) {
           complex.ComplexSchedules = complex.ComplexSchedules.filter(
             (schedule) => {
-              console.log("franco the id to compare: ", schedule._id);
-
-              console.log(
-                "franco y lo incluye?? ",
-                action.payload.schedulesIds.includes(schedule._id)
-              );
-
               if (!action.payload.schedulesIds.includes(schedule._id)) {
                 return schedule;
               }

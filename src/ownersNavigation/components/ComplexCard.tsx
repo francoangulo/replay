@@ -31,7 +31,7 @@ export const ComplexCard = ({
 
       setComplexImageURL(response.data.imageURL.imageURL);
     } catch (error) {
-      console.log("Error getting complex image URL", error);
+      console.error("Error getting complex image URL", error);
     }
   };
 

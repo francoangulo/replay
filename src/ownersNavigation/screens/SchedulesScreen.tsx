@@ -32,14 +32,6 @@ export const SchedulesScreen = ({ navigation, route }: Props) => {
     selectComplexById(state, complexId)
   );
 
-  useEffect(() => {
-    console.log(
-      "franco the complex schedules --> ",
-      JSON.stringify(complex?.ComplexSchedules, null, 4)
-    );
-    return () => {};
-  }, [complex]);
-
   const {
     currentPickingError,
     currentPickingDate,

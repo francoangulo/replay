@@ -21,12 +21,6 @@ export const useComplexMainPicture = ({
 
   useEffect(() => {
     if (wantedComplex?.mainPictureURL) {
-      console.log("entering here...");
-      console.log(
-        "franco the mainPictureURL --> ",
-        JSON.stringify(wantedComplex.mainPictureURL, null, 4)
-      );
-
       setComplexMainPicture(wantedComplex.mainPictureURL.imageURL);
     } else {
       dispatch(getComplexMainPicture({ complexId, mainPictureKey }));

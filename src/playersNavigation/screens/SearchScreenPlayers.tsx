@@ -77,14 +77,7 @@ export const SearchScreenPlayers = ({ navigation, route }: Props) => {
             complex.latitude,
             complex.longitude
           );
-          console.log(
-            "franco the haversine distance: ",
-            JSON.stringify(haversineDistance, null, 4)
-          );
-          console.log(
-            "franco the km distance: ",
-            JSON.stringify(kmDistance, null, 4)
-          );
+
           return haversineDistance <= kmDistance;
         });
 

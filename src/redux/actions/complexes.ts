@@ -138,11 +138,6 @@ export const uploadComplexExtraPicture =
         body
       );
 
-      console.log(
-        "franco the payload --> ",
-        JSON.stringify(resp.data.updatedComplex, null, 4)
-      );
-
       dispatch(
         addComplexExtraPicturesKeys({
           complexId: resp.data.updatedComplex?._id,
@@ -327,11 +322,6 @@ export const deleteComplexSchedule =
     try {
       const resp = await replayAPI.delete<DeleteScheduleResponse>(
         `/complexes-schedules?schedulesIds=${body.schedulesIds}`
-      );
-
-      console.log(
-        "franco the response --> ",
-        JSON.stringify(resp.data, null, 4)
       );
 
       dispatch(
