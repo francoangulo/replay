@@ -81,7 +81,7 @@ export const ownerTurnsSlice = createSlice({
   },
 });
 
-const { setOwnerTurns } = ownerTurnsSlice.actions;
+export const { setOwnerTurns } = ownerTurnsSlice.actions;
 const { setPlayerTurns } = ownerTurnsSlice.actions;
 const { setAllTurns } = ownerTurnsSlice.actions;
 const { resetAllTurns } = ownerTurnsSlice.actions;

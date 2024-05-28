@@ -1,8 +1,17 @@
 import { useEffect, useRef } from "react";
-import { Alert } from "react-native";
+import { useAppDispatch, useAppSelector } from "./redux";
+import { selectTurns, setOwnerTurns } from "../redux/slices/turnsSlice";
 
 export const useWebSockets = () => {
   const ws = useRef<WebSocket>();
+  const { ownerTurns } = useAppSelector(selectTurns);
+  const dispatch = useAppDispatch();
+  const ownerTurnsRef = useRef(ownerTurns);
+
+  // Update the ref whenever ownerTurns changes
+  useEffect(() => {
+    ownerTurnsRef.current = ownerTurns;
+  }, [ownerTurns]);
 
   useEffect(() => {
     ws.current = new WebSocket("ws://localhost:3000"); // Replace 'your-server-ip' with your server IP address or hostname
@@ -12,12 +21,9 @@ export const useWebSockets = () => {
 
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log("Received message from server:", message);
       // Process the received message here
       if (message.type === "NEW_TURN") {
-        Alert.alert("New turn", "A new turn has been scheduled!", [
-          { text: "Aceptar", onPress: () => {} },
-        ]);
+        dispatch(setOwnerTurns(ownerTurnsRef.current.concat(message.data)));
       }
     };
 
@@ -33,7 +39,7 @@ export const useWebSockets = () => {
       // Close the WebSocket connection when component unmounts
       ws?.current?.close();
     };
-  }, []);
+  }, [dispatch]);
 
   return { ws };
 };
