@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "setLocalPhy": "ENVFILE=.env.localphy",
+    "setDevelopment-w": "set ENVFILE=.env.development &&",
     "setDevelopment": "ENVFILE=.env.development",
     "setStaging": "ENVFILE=.env.staging",
     "setProduction": "ENVFILE=.env.production",
     "android": "react-native run-android",
     "android-development": "yarn setDevelopment  react-native run-android",
+    "android-development-w": "yarn setDevelopment-w  react-native run-android",
     "android-staging": "yarn setStaging  react-native run-android",
     "android-production": "yarn setProduction  react-native run-android",
     "ios-development-xs": "yarn setDevelopment react-native run-ios --mode=Debug --scheme \"replayDevelopment\" --simulator='iPhone Xs'",
