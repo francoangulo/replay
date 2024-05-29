@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleProp, StyleSheet, Text, TextStyle, View } from "react-native";
+import { TextComponent } from "../../components/TextComponent";
 
 interface Props {
   title: string;
@@ -10,8 +11,10 @@ interface Props {
 export const TurnCardRow = ({ title, value, valueTextStyles = {} }: Props) => {
   return (
     <View style={styles.rowContainer}>
-      <Text style={styles.rowTitle}>{title}: </Text>
-      <Text style={valueTextStyles}>{value}</Text>
+      <TextComponent type="text" customStyles={styles.rowTitle}>
+        {title}:{" "}
+      </TextComponent>
+      <TextComponent type="text">{value}</TextComponent>
     </View>
   );
 };

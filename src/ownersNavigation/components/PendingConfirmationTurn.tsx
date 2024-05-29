@@ -5,6 +5,9 @@ import { DateTime } from "luxon";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import { Turn } from "../../interfaces/Turns";
 import { TurnCardRow } from "../../sharedNavigation/components/TurnCardRow";
+import { TextComponent } from "../../components/TextComponent";
+import { useAppSelector } from "../../hooks/redux";
+import { selectComplexes } from "../../redux/slices/complexesSlice";
 
 interface Props {
   onPress: () => void;
@@ -13,6 +16,7 @@ interface Props {
 
 export const PendingConfirmationTurn = ({ onPress, turn }: Props) => {
   const { startDate, endDate } = turn;
+  const { complexes } = useAppSelector(selectComplexes);
   const startDateTime = DateTime.fromISO(startDate);
   const endDateTime = DateTime.fromISO(endDate);
 
@@ -22,9 +26,15 @@ export const PendingConfirmationTurn = ({ onPress, turn }: Props) => {
       style={[cardStyle, { backgroundColor: colors.dangerLight }]}
     >
       <View style={styles.cardHeader}>
-        <Text style={styles.timeText}>Cancha {turn.fieldNumber}</Text>
+        <TextComponent type="subtitle">
+          {complexes.find((complex) => complex._id === turn.complexId)?.name ||
+            ""}
+        </TextComponent>
         <IonIcon name="alert" size={24} color={colors.danger} />
       </View>
+      <TextComponent type="text">
+        Cancha {String(turn.fieldNumber)}
+      </TextComponent>
       <TurnCardRow title="Inicio" value={startDateTime.toFormat("HH:mm")} />
       <TurnCardRow title="Fin" value={endDateTime.toFormat("HH:mm")} />
     </TouchableOpacity>
