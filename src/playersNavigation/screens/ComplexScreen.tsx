@@ -1,12 +1,6 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import {
   calendarProviderStyles,
   calendarProviderTheme,
@@ -31,6 +25,7 @@ import { TurnDurationSelector } from "../components/TurnDurationSelector";
 import { PlayersAmountSelector } from "../components/PlayersAmountSelector";
 import { AvailableTurn } from "../../hooks/useAvailableTurns";
 import { CommonActions } from "@react-navigation/native";
+import { GenericButton } from "../../components/GenericButton";
 
 interface Props
   extends StackScreenProps<SearchStackParamList, "ComplexScreen"> {}
@@ -151,7 +146,7 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
         selectedTurn={selectedTurn}
         submitTurn={submitTurn}
       />
-      <Header complex={complex} navigation={navigation} route={route} />
+      <Header title={complex.name} navigation={navigation} route={route} />
       <ScrollView
         style={styles.scrollViewStyle}
         contentContainerStyle={styles.scrollViewContentStyle}
@@ -165,7 +160,6 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
           }}
           style={calendarProviderStyles}
         >
-          {/* <View> */}
           <ComplexBanner complex={complex} />
           <View style={styles.dateSelectorTitleContainer}>
             <IonIcon name="calendar-outline" size={18} />
@@ -202,30 +196,17 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
               />
             </>
           )}
-          {/* </View> */}
 
           {filteredTurns.length ? (
             <View style={styles.footerButtonsContainer}>
-              {/* <TouchableOpacity
-                style={styles.emptyTurnsButton}
-                onPress={() => dispatch(emptyTurns())}
-              >
-                <Text style={styles.emptyTurnsButtonText}>Vaciar turnos</Text>
-              </TouchableOpacity> */}
-              <TouchableOpacity
-                style={{
-                  ...styles.bookTurnButton,
-                  ...(selectedTurn?.turnTime && selectedTurn?.duration
-                    ? {}
-                    : { opacity: 0.35 }),
-                }}
-                {...((!selectedTurn?.turnTime || !selectedTurn?.duration) && {
-                  activeOpacity: 0.35,
+              <GenericButton
+                buttonText="Reservar Turno"
+                buttonType="primary"
+                {...(!(selectedTurn?.turnTime && selectedTurn?.duration) && {
+                  customButtonStyle: { opacity: 0.35 },
                 })}
-                onPress={() => submitTurn()}
-              >
-                <Text style={styles.bookTurnButtonText}>Reservar turno</Text>
-              </TouchableOpacity>
+                onButtonPress={submitTurn}
+              />
             </View>
           ) : null}
         </CalendarProvider>
@@ -257,8 +238,6 @@ const styles = StyleSheet.create({
     //     paddingBottom: 232,
   },
   footerButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     padding: 16,
   },
 
