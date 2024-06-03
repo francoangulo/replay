@@ -100,18 +100,16 @@ export const OwnersHomeScreen = ({ route, navigation }: Props) => {
           colors.primaryThree,
           colors.appBg,
         ]}
-        style={{ flex: 1 }}
+        style={styles.contentGradientContainer}
       >
-        <View
-          style={{
-            width: "100%",
-            backgroundColor: `${colors.primaryOne}dd`,
-            paddingTop: top + 8,
-            zIndex: 1,
-            height: 20,
-            position: "absolute",
-            top: 0,
-          }}
+        <LinearGradient
+          colors={[
+            `${colors.primaryOne}`,
+            `${colors.primaryOne}`,
+            `${colors.primaryOne}`,
+            `${colors.primaryOne}00`,
+          ]}
+          style={[styles.headerGradient, { paddingTop: top + 16 }]}
         />
         <ScrollView
           contentContainerStyle={styles.screenContainer}
@@ -119,26 +117,11 @@ export const OwnersHomeScreen = ({ route, navigation }: Props) => {
             <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
           }
         >
-          <View
-            style={{
-              width: "100%",
-              flexShrink: 0,
-              backgroundColor: `${colors.primaryOne}`,
-              paddingBottom: 16,
-              padding: 16,
-              paddingTop: top + 8,
-              justifyContent: "flex-end",
-            }}
-          >
-            <TextComponent
-              type="title"
-              children={`Bienvenido, ${name}!`}
-              customStyles={{ fontWeight: "500", fontSize: 24 }}
-            />
+          <View style={[styles.headerContent, { paddingTop: top + 8 }]}>
+            <TextComponent type="title" children={`Bienvenido, ${name}!`} />
             <TextComponent
               type="title"
               children={`Revisa tus últimas novedades`}
-              customStyles={{ fontWeight: "500", fontSize: 24 }}
             />
           </View>
           <View style={styles.contentContainer}>
@@ -248,4 +231,18 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     padding: 8,
   },
+  headerContent: {
+    width: "100%",
+    flexShrink: 0,
+    backgroundColor: `${colors.primaryOne}`,
+    paddingBottom: 16,
+    padding: 16,
+    justifyContent: "flex-end",
+  },
+  headerGradient: {
+    width: "100%",
+    zIndex: 1,
+    position: "absolute",
+  },
+  contentGradientContainer: { flex: 1 },
 });
