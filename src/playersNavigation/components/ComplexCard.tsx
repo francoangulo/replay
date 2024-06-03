@@ -15,6 +15,7 @@ import { useAppSelector } from "../../hooks/redux";
 import { selectTurns } from "../../redux/slices/turnsSlice";
 import { TextComponent } from "../../components/TextComponent";
 import { useComplexMainPicture } from "../../hooks/useComplexMainPicture";
+import { CommonActions, useFocusEffect } from "@react-navigation/native";
 
 interface Props extends StackScreenProps<any, any> {
   complex: Complex;
@@ -40,16 +41,14 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
   });
   const { name, address } = complex;
 
-  // Following useEffect adds a listener for the screen focus. Each time the user pops this screen on top
-  useEffect(() => {
-    const focusListener = navigation.addListener("focus", () => {
-      // If we receive a complex, it comes from MapScreen (ViewTurns action)
+  useFocusEffect(
+    React.useCallback(() => {
       if (paramsComplex) {
         // If this is the matching complex, we navigate to ComplexScreen
         if (paramsComplex._id === complex._id) {
           // First remove the param to avoid jumping to ComplexScreen
           // every time this screen is focused
-          navigation.setParams({ paramsComplex: null });
+          navigation.dispatch(CommonActions.setParams({ paramsComplex: null }));
 
           // Then jump into the ComplexScreen
           navigation.navigate("ComplexScreen", {
@@ -61,14 +60,9 @@ export const ComplexCard = ({ navigation, complex, paramsComplex }: Props) => {
           });
         }
       }
-    });
-
-    // Make sure to remove the event listener when screen unmounts
-    return () => {
-      focusListener();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [paramsComplex])
+  );
 
   useEffect(() => {
     getAvailableTurns(complex);
