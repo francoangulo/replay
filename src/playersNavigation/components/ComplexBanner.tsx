@@ -1,88 +1,75 @@
-import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { useEffect, useState } from "react";
+import { Image, StyleSheet, View } from "react-native";
 import { Complex } from "../../interfaces/complexes";
 import { colors } from "../../theme/appTheme";
-import { DateTime } from "luxon";
 import { useComplexMainPicture } from "../../hooks/useComplexMainPicture";
-
-const weekdaysReference = ["L", "M", "M", "J", "V", "S", "D"];
+import { ImageColorsResult } from "react-native-image-colors/lib/typescript/types";
+import ImageColors from "react-native-image-colors";
 
 interface BannerProps {
   complex: Complex;
 }
 
 export const ComplexBanner = ({ complex }: BannerProps) => {
-  const { top } = useSafeAreaInsets();
+  const [imageColor, setImageColor] = useState<string>("");
 
   const { complexMainPicture } = useComplexMainPicture({
     complexId: complex._id,
     mainPictureKey: complex.mainPictureKey,
   });
 
-  return (
-    <>
-      <LinearGradient
-        colors={["#000000cc", "#00000066", "#00000000"]}
-        style={{
-          ...styles.gradient,
-          paddingTop: top + 20,
-        }}
-      >
-        {complex?.ComplexSchedules?.map(
-          ({ openingTime, closingTime, weekDays }, idx) => {
-            return (
-              <View style={styles.chipContainer} key={`complex-banner-${idx}`}>
-                <View style={styles.weekdaysContainer}>
-                  {weekDays?.map((day, weekDayIndex) => (
-                    <Text key={`weekday-${weekDayIndex}`}>
-                      {weekdaysReference[day]}
-                    </Text>
-                  ))}
-                </View>
-                <Text>
-                  {DateTime.fromFormat(openingTime, "HH:mm:ss").toFormat(
-                    "HH:mm"
-                  )}{" "}
-                  -{" "}
-                  {DateTime.fromFormat(closingTime, "HH:mm:ss").toFormat(
-                    "HH:mm"
-                  )}
-                </Text>
-              </View>
-            );
-          }
-        )}
-      </LinearGradient>
+  const getImagePrimaryColor = async () => {
+    const colorsResult: ImageColorsResult = await ImageColors.getColors(
+      complexMainPicture,
+      {
+        fallback: colors.primary,
+        cache: true,
+        key: complexMainPicture,
+      }
+    );
 
-      <Image
-        source={{
-          uri: complexMainPicture,
-        }}
-        style={styles.bannerImage}
-      />
-    </>
+    if (colorsResult.platform === "ios") {
+      setImageColor(colorsResult.primary);
+    } else {
+      if (colorsResult.platform === "android") {
+        setImageColor(colorsResult.average || colors.primary);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (complexMainPicture?.length) {
+      getImagePrimaryColor();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [complexMainPicture]);
+
+  return (
+    <View style={styles.pictureContainer}>
+      {complexMainPicture?.length ? (
+        <View style={[styles.imageShadow, { shadowColor: imageColor }]}>
+          <Image
+            source={{ uri: complexMainPicture }}
+            style={[styles.complexPicture]}
+          />
+        </View>
+      ) : null}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  gradient: {
-    width: "100%",
-    height: 250,
-    zIndex: 1,
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    flexDirection: "row",
+  complexPicture: { aspectRatio: 16 / 7, borderRadius: 24 },
+  pictureContainer: { paddingHorizontal: 16, paddingVertical: 16 },
+  bannerImage: { width: "100%", aspectRatio: 16 / 7, zIndex: -1 },
+  imageShadow: {
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 15.46,
+
+    elevation: 9,
   },
-  chipContainer: {
-    backgroundColor: `${colors.cardBg}bb`,
-    borderRadius: 8,
-    padding: 4,
-    paddingHorizontal: 8,
-  },
-  weekdaysContainer: { flexDirection: "row", justifyContent: "space-around" },
-  bannerImage: { width: "100%", height: 250, zIndex: -1 },
 });

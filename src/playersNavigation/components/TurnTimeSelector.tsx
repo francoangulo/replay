@@ -128,13 +128,13 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 16,
   },
-  turnButton: { flexShrink: 0, borderRadius: 4 },
+  turnButton: { flexShrink: 0, borderRadius: 12 },
 
   turnText: {
     color: colors.primary,
     borderWidth: 1,
     borderColor: colors.primary,
-    borderRadius: 4,
+    borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
     minWidth: 60,

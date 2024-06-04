@@ -1,31 +1,37 @@
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { CalendarProvider, ExpandableCalendar } from "react-native-calendars";
+import { CommonActions } from "@react-navigation/native";
+import { DateTime } from "luxon";
+import { ScrollView } from "react-native-gesture-handler";
 import { StackScreenProps } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+
+import { createTurn } from "../../redux/slices/turnsSlice";
+import { selectAuth } from "../../redux/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import {
   calendarProviderStyles,
   calendarProviderTheme,
   colors,
   expandableCalendarTheme,
 } from "../../theme/appTheme";
-import { DateTime } from "luxon";
-import { createTurn } from "../../redux/slices/turnsSlice";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux";
-import { selectAuth } from "../../redux/slices/authSlice";
 
-import { ScrollView } from "react-native-gesture-handler";
 import IonIcon from "react-native-vector-icons/Ionicons";
-import { SearchStackParamList } from "../navigators/SearchNavigatorPlayers";
-import { CalendarProvider, ExpandableCalendar } from "react-native-calendars";
+
 import { Turn } from "../../interfaces/Turns";
-import { Header } from "../components/Header";
-import { TurnTimeSelector } from "../components/TurnTimeSelector";
-import { ComplexBanner } from "../components/ComplexBanner";
-import { ConfirmTurnModal } from "../components/ConfirmTurnModal";
-import { TurnDurationSelector } from "../components/TurnDurationSelector";
-import { PlayersAmountSelector } from "../components/PlayersAmountSelector";
 import { AvailableTurn } from "../../hooks/useAvailableTurns";
-import { CommonActions } from "@react-navigation/native";
-import { GenericButton } from "../../components/GenericButton";
+import { SearchStackParamList } from "../navigators/SearchNavigatorPlayers";
+
+import {
+  ComplexBanner,
+  ConfirmTurnModal,
+  GenericButton,
+  Header,
+  PlayersAmountSelector,
+  SchedulesChips,
+  TurnDurationSelector,
+  TurnTimeSelector,
+} from "../components";
 
 interface Props
   extends StackScreenProps<SearchStackParamList, "ComplexScreen"> {}
@@ -160,6 +166,7 @@ export const ComplexScreen = ({ route, navigation }: Props) => {
           }}
           style={calendarProviderStyles}
         >
+          <SchedulesChips complexSchedules={complex?.ComplexSchedules} />
           <ComplexBanner complex={complex} />
           <View style={styles.dateSelectorTitleContainer}>
             <IonIcon name="calendar-outline" size={18} />
@@ -262,7 +269,11 @@ const styles = StyleSheet.create({
 
 const sortByDate = (turnsToSort: AvailableTurn[]) =>
   turnsToSort.sort((turnA, turnB) => {
-    if (turnA.turnTime < turnB.turnTime) return -1;
-    if (turnB.turnTime < turnA.turnTime) return 1;
+    if (turnA.turnTime < turnB.turnTime) {
+      return -1;
+    }
+    if (turnB.turnTime < turnA.turnTime) {
+      return 1;
+    }
     return 0;
   });

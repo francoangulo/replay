@@ -24,6 +24,7 @@ import { FadeModal } from "../components/FadeModal";
 import { FadeModalState } from "../../interfaces/FadeModal";
 import { buildImageObjectToUpload } from "../../utils/utils";
 import { postComplex } from "../../redux/actions/complexes";
+import { GenericButton } from "../../components/GenericButton";
 
 type Props = StackScreenProps<ProfileStackParamList, "AddComplexScreen">;
 interface FormErrors {
@@ -43,14 +44,6 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
     complexId: "",
     autoDismiss: true,
   });
-
-  useEffect(() => {
-    navigation.replace("AddFieldsScreen", {
-      complexId: "123",
-    });
-    return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (
@@ -279,40 +272,19 @@ export const AddComplexScreenOwners = ({ navigation, route }: Props) => {
               )}
             </View>
             <View style={{ flexDirection: "row", gap: 16 }}>
-              <TouchableOpacity
-                style={{
-                  flex: 0.75,
-                  borderRadius: 4,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => navigation.pop()}
-              >
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    color: colors.danger,
-                  }}
-                >
-                  Cancelar
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{
-                  flex: 1.25,
-                  backgroundColor: colors.primary,
-                  paddingHorizontal: 16,
-                  paddingVertical: 12,
-                  borderRadius: 4,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => goNextStep()}
-              >
-                <Text style={{ fontWeight: "bold", color: colors.appBg }}>
-                  Siguiente
-                </Text>
-              </TouchableOpacity>
+              <GenericButton
+                buttonText="Cancelar"
+                onButtonPress={() => navigation.pop()}
+                buttonType="dangerNoBg"
+                customButtonStyle={{ flex: 0.3 }}
+              />
+
+              <GenericButton
+                buttonText="Siguiente"
+                onButtonPress={goNextStep}
+                buttonType="primary"
+                customButtonStyle={{ flex: 0.7 }}
+              />
             </View>
           </View>
         </ScrollView>
