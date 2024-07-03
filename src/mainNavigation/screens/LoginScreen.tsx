@@ -54,10 +54,11 @@ export const LoginScreen = ({ navigation, route }: Props) => {
   };
 
   const submitDevPlayer = async () => {
+    console.log('jugadoranashei')
     dispatch(
       loginUser({
-        email: "francoplayer@gmail.com",
-        password: "franco2001",
+        email: "juan@gmail.com",
+        password: "123456",
         callback: (userType) => {
           const destinationRoute =
             userType && userType === "player"
@@ -72,10 +73,12 @@ export const LoginScreen = ({ navigation, route }: Props) => {
   };
 
   const submitDevOwner = async () => {
+    console.log('owner')
+
     dispatch(
       loginUser({
-        email: "francoowner@gmail.com",
-        password: "franco2001",
+        email: "ezebalasch@gmail.com",
+        password: "123456",
         callback: (userType) => {
           const destinationRoute =
             userType && userType === "player"
